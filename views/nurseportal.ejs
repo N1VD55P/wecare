@@ -1,0 +1,115 @@
+<!-- views/nurseportal.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nurse Dashboard</title>
+  <link rel="stylesheet" href="/css/nurseportal.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main class="main-content">
+    <header class="top-bar">
+      <div>
+        <h2>Welcome, <%= typeof nurse !== 'undefined' ? nurse.name : 'Meera' %>!</h2>
+        <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today</p>
+      </div>
+    </header>
+
+    <section class="stats">
+      <% 
+      const stats = typeof nurseStats !== 'undefined' ? nurseStats : {
+        earnings: '24500',
+        pendingRequests: '3',
+        hoursWorked: '6.5h',
+        rating: '4.9'
+      };
+      %>
+      
+      <div class="stat-card">
+        <h3>Rs.<%= stats.earnings %></h3>
+        <p>Today's Earnings</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= stats.pendingRequests %></h3>
+        <p>Pending Requests</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= stats.hoursWorked %></h3>
+        <p>Hours Worked</p>
+      </div>
+      <div class="stat-card">
+        <h3><%= stats.rating %></h3>
+        <p>Rating</p>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="appointments">
+        <h3>Today's Appointments</h3>
+        <% 
+        const todayAppointments = [
+          { patient: 'Manasvi Vats', service: 'Post-surgery care', time: '9:00 AM - 11:00 AM', color: 'blue', initials: 'MV' },
+          { patient: 'Akash Jain', service: 'Medication administration', time: '1:00 PM - 2:30 PM', color: 'green', initials: 'AJ' },
+          { patient: 'Isha Sharma', service: 'Physical therapy assistance', time: '4:00 PM - 6:00 PM', color: 'purple', initials: 'IS' }
+        ];
+        %>
+        
+        <% todayAppointments.forEach(appointment => { %>
+          <div class="appointment-card <%= appointment.color %>">
+            <span class="avatar"><%= appointment.initials %></span>
+            <div>
+              <h4><%= appointment.patient %></h4>
+              <p><%= appointment.service %></p>
+              <span><%= appointment.time %></span>
+            </div>
+            <button class="navigate-btn">Navigate</button>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="right-side">
+        <div class="pending">
+          <h3>Pending Requests</h3>
+          <% 
+          const pendingRequests = [
+            { patient: 'Parth Bansal', service: 'Wound care', time: 'Tomorrow 10:00 AM' },
+            { patient: 'Ashwika', service: 'Elderly care', time: 'Friday 2:00 PM' }
+          ];
+          %>
+          
+          <% pendingRequests.forEach(request => { %>
+            <div class="pending-card">
+              <h4><%= request.patient %></h4>
+              <p><%= request.service %> – <%= request.time %></p>
+              <div class="actions">
+                <button class="accept">Accept</button>
+                <button class="decline">Decline</button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <div class="earnings">
+          <h3>Earnings Summary</h3>
+          <% 
+          const earnings = typeof nurseEarnings !== 'undefined' ? nurseEarnings : {
+            week: '1,240',
+            month: '4,890',
+            pending: '320'
+          };
+          %>
+          
+          <p>This Week <span>Rs.<%= earnings.week %></span></p>
+          <p>This Month <span>Rs.<%= earnings.month %></span></p>
+          <p class="pending-pay">Pending Payment <span>Rs.<%= earnings.pending %></span></p>
+          <button class="details-btn">View Details</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/nurseportal.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeCare - Trusted Nurses Anytime</title>
+  <link rel="stylesheet" href="/css/home_style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <%- include('partials/header', { page: 'home', showLogin: true }) %>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1>Find Trusted Nurses <span class="highlight">Near You</span></h1>
+      <p>Professional healthcare at home. Verified nurses available 24/7 for your care needs.</p>
+      
+      <div class="search-box">
+        <input type="text" placeholder="Enter your Area/Pin Code">
+        <select>
+          <option>Morning (6AM - 12PM)</option>
+          <option>Afternoon (12PM - 6PM)</option>
+          <option>Evening (6PM - 12AM)</option>
+          <option>Night (12AM - 6AM)</option>
+        </select>
+        <button>Search</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us -->
+  <section id="about">
+    <div class="about-section">
+      <div class="about-container">
+        <div class="about-image">
+          <img src="/assets/image.png" alt="Healthcare team">
+        </div>
+
+        <div class="about-content">
+          <h2>About Us</h2>
+          <p class="description">
+            We bridge patients and certified nurses. We provide on-demand healthcare assistance 
+            with background checks, ongoing care & focus on safety for both patients and staff.
+          </p>
+
+          <div class="points">
+            <div class="point">
+              <i class="fa-solid fa-user-nurse"></i>
+              <div>
+                <h4>Certified Nurses</h4>
+                <p>100% Verified</p>
+              </div>
+            </div>
+            <div class="point">
+              <i class="fa-solid fa-ambulance"></i>
+              <div>
+                <h4>Emergency Support</h4>
+                <p>24/7 Availability</p>
+              </div>
+            </div>
+            <div class="point">
+              <i class="fa-solid fa-file-invoice-dollar"></i>
+              <div>
+                <h4>Transparent Pricing</h4>
+                <p>No hidden costs</p>
+              </div>
+            </div>
+            <div class="point">
+              <i class="fa-solid fa-shield-heart"></i>
+              <div>
+                <h4>Insurance Support</h4>
+                <p>Hassle-free claims</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Nurses -->
+  <section class="doctors-section">
+    <div class="header">
+      <p class="subtitle">MEET OUR DOCTORS</p>
+      <h2 class="title">We're Dedicated To Your Well-Being</h2>
+    </div>
+
+    <div class="doctors-container">
+      <% 
+      const doctors = [
+        { name: 'Medha Shankar', role: 'Physiotherapist', rating: 4.8, image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg' },
+        { name: 'Janvi Malik', role: 'Cardiologist', rating: 4.9, image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg' },
+        { name: 'Ashwika Mittal', role: 'Dermatologist', rating: 4.5, image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg' },
+        { name: 'Avni Gupta', role: 'Orthopedic Surgeon', rating: 4.0, image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg' }
+      ];
+      %>
+      
+      <% doctors.forEach(doctor => { %>
+        <div class="doctor-card">
+          <div class="doctor-img">
+            <img src="<%= doctor.image %>" alt="<%= doctor.name %>">
+          </div>
+          <h3><%= doctor.name %></h3>
+          <p class="designation"><%= doctor.role %></p>
+          <div class="rating">
+            ⭐ <%= doctor.rating %> Rating
+          </div>
+          <a href="/nurses">
+            <button class="book-btn">Book Appointment</button>
+          </a>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <h2>WHY EVERYONE LOVE AND TRUST</h2>
+    <h1>WeCare</h1>
+    <div class="stats-cards">
+      <% 
+      const stats = [
+        { value: '90%', text: 'Over 90% of elderly have improved by availing our services' },
+        { value: '4.2', text: 'Detailed thank you notes sent via Google reviews' },
+        { value: '20K+', text: 'Over 20K Nurses trailed all over India' },
+        { value: '25%', text: 'Families refer us to their friends and family' }
+      ];
+      %>
+      
+      <% stats.forEach(stat => { %>
+        <div class="stat-card">
+          <h3><%= stat.value %></h3>
+          <p><%= stat.text %></p>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonial-section">
+    <h2 class="section-title">What The People Thinks About Us</h2>
+
+    <div class="testimonial-container">
+      <% 
+      const testimonials = [
+        { name: 'Mitali Salhotra', duration: 'One Year With Us', text: 'Waah waah kya website hai', image: 'https://i.pinimg.com/1200x/b4/f0/4d/b4f04de35a64a288d4a325ef3ca3be6e.jpg', color: 'purple' },
+        { name: 'Mehak Bhardwaj', duration: 'One Year With Us', text: 'sooooo goooddddd', image: 'https://i.pinimg.com/736x/43/85/24/438524853beb52c89bbff69d3af02af8.jpg', color: 'pink' },
+        { name: 'Navdeep Singh', duration: 'One Year With Us', text: 'mustarddddddd', image: 'https://i.pinimg.com/1200x/64/74/22/6474227f52d2b8b47d330242c34b63ef.jpg', color: 'purple' }
+      ];
+      %>
+      
+      <% testimonials.forEach(testimonial => { %>
+        <div class="testimonial-card">
+          <div class="user-info">
+            <img src="<%= testimonial.image %>" alt="<%= testimonial.name %>">
+            <div>
+              <h3><%= testimonial.name %></h3>
+              <span><%= testimonial.duration %></span>
+            </div>
+          </div>
+          <p class="testimonial-text"><%= testimonial.text %></p>
+          <i class="fa-solid fa-quote-right quote-icon <%= testimonial.color %>"></i>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+
+  <script src="/js/home_script.js"></script>
+</body>
+</html>

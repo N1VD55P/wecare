@@ -1,0 +1,75 @@
+<!-- views/services.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeCare - Services</title>
+  <link rel="stylesheet" href="/css/services.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+</head>
+<body>
+  <%- include('partials/header', { page: 'services', showLogin: false }) %>
+
+  <section class="features-section">
+    <h1>Our Features & Services</h1>
+
+    <div class="card-container">
+      <% 
+      const services = [
+        {
+          title: 'Free Checkup',
+          description: 'Regular health checkups at no cost to keep you healthy and safe.',
+          icon: 'https://img.icons8.com/color/96/medical-doctor.png'
+        },
+        {
+          title: 'Cardiogram',
+          description: 'Advanced heart monitoring for early detection and care.',
+          icon: 'https://img.icons8.com/color/96/heart-with-pulse.png'
+        },
+        {
+          title: 'Blood Bank',
+          description: 'Quick and safe access to blood units when you need them most.',
+          icon: '/assets/blood-bag.png'
+        },
+        {
+          title: 'Home Nursing Care',
+          description: 'Compassionate medical care delivered right at your home.',
+          icon: 'https://img.icons8.com/color/96/nurse-female.png'
+        },
+        {
+          title: 'Emergency Assistance',
+          description: 'Immediate medical response in critical situations.',
+          icon: 'https://img.icons8.com/color/96/ambulance.png'
+        },
+        {
+          title: '24/7 Chat Support',
+          description: 'Expert help and guidance available anytime, anywhere.',
+          icon: 'https://img.icons8.com/color/96/chat.png'
+        },
+        {
+          title: 'Post-Surgical Care',
+          description: 'Comprehensive recovery support after surgery including vital monitoring, pain management.',
+          icon: 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png'
+        },
+        {
+          title: 'Chronic Disease Management',
+          description: 'Ongoing care for diabetes, hypertension, COPD, and other chronic conditions.',
+          icon: 'https://cdn-icons-png.flaticon.com/512/2966/2966445.png'
+        }
+      ];
+      %>
+      
+      <% services.forEach(service => { %>
+        <div class="card">
+          <img src="<%= service.icon %>" alt="<%= service.title %>">
+          <h2><%= service.title %></h2>
+          <p><%= service.description %></p>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

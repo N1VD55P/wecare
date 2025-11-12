@@ -1,0 +1,22 @@
+<!-- Header/Navbar -->
+<nav class="navbar">
+  <div class="logo">
+    <a href="/" style="color: white; text-decoration: none;">🏥 WeCare</a>
+  </div>
+  
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/nurses">Find Nurses</a></li>
+    <li><a href="/services">Services</a></li>
+    <li><a href="/news">News</a></li>
+    <% if (page === 'nurseportal') { %>
+      <li><a href="/nurseportal">My Portal</a></li>
+    <% } else if (page === 'patientportal') { %>
+      <li><a href="/patientportal">My Portal</a></li>
+    <% } %>
+  </ul>
+
+  <% if (showLogin && page !== 'patientportal' && page !== 'nurseportal') { %>
+    <a href="/login"><button class="login_btn">Login</button></a>
+  <% } %>
+</nav>

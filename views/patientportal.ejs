@@ -1,0 +1,199 @@
+<!-- views/patientportal.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Portal</title>
+  <link rel="stylesheet" href="/css/patient.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <main class="main-content">
+    <header class="header">
+      <div class="header-content">
+        <div class="welcome-section">
+          <h1 class="welcome-title">Welcome back, <%= typeof patient !== 'undefined' ? patient.name : 'Advi' %>!</h1>
+          <p class="welcome-subtitle">Here's your health overview for today</p>
+        </div>
+        <div class="header-actions">
+          <button class="help-btn">Help</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-content">
+      <!-- Appointments -->
+      <section class="appointments-section">
+        <div class="section-header">
+          <h2 class="section-title">Upcoming Appointments</h2>
+        </div>
+        <div class="appointments-list">
+          <% 
+          const defaultAppointments = [
+            {
+              nurse: 'Nurse Vibha',
+              type: 'Home Visit - General Checkup',
+              time: 'Today, 2:00 PM',
+              image: 'https://img.freepik.com/premium-psd/png-smiling-indian-woman-nurse-pose-against-transparent-background-ideal-healthcare-medical-related-content_1031432-57667.jpg?w=360',
+              canJoin: true
+            },
+            {
+              nurse: 'Nurse Akansha Sharma',
+              type: 'Medication Review',
+              time: 'Tomorrow, 10:00 AM',
+              image: 'https://img.freepik.com/premium-psd/png-smiling-indian-woman-nurse-pose-against-transparent-background-ideal-healthcare-medical-related-content_1031432-58079.jpg?w=360',
+              canJoin: false
+            }
+          ];
+          
+          const appointmentList = typeof appointments !== 'undefined' ? appointments : defaultAppointments;
+          %>
+          
+          <% appointmentList.forEach(appointment => { %>
+            <div class="appointment-card">
+              <div class="appointment-icon">
+                <img src="<%= appointment.image %>" alt="<%= appointment.nurse %>" />
+              </div>
+              <div class="appointment-details">
+                <div class="appointment-name"><%= appointment.nurse %></div>
+                <div class="appointment-type"><%= appointment.type %></div>
+                <div class="appointment-time"><%= appointment.time %></div>
+              </div>
+              <% if (appointment.canJoin) { %>
+                <button class="join-call-btn">Join Call</button>
+              <% } else { %>
+                <button class="reschedule-btn">Reschedule</button>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </section>
+
+      <!-- Action Cards -->
+      <div class="action-cards">
+        <div class="action-card blue">
+          <div class="action-icon">
+            <img src="https://png.pngtree.com/element_our/png/20181206/find-vector-icon-png_260845.jpg" alt="Find Nurse" />
+          </div>
+          <h3 class="action-title">Find Nurse</h3>
+          <p class="action-description">Search and book qualified nurses in your area</p>
+          <button class="action-btn blue" id="find-nurse-btn">Search Now</button>
+        </div>
+
+        <div class="action-card green">
+          <div class="action-icon">
+            <img src="https://png.pngtree.com/png-clipart/20191120/original/pngtree-prescription-icon-vector-png-image_5072924.jpg" alt="Prescription" />
+          </div>
+          <h3 class="action-title">View Prescriptions</h3>
+          <p class="action-description">Access your current medications and dosages</p>
+          <button class="action-btn green" id="prescription-btn">View All</button>
+        </div>
+
+        <div class="action-card blue">
+          <div class="action-icon">
+            <img src="https://png.pngtree.com/png-clipart/20190617/original/pngtree-vector-chat-icon-png-image_3876650.jpg" alt="Chat with Nurse" />
+          </div>
+          <h3 class="action-title">Chat with Nurse</h3>
+          <p class="action-description">Get instant support from healthcare professionals</p>
+          <button class="action-btn blue" id="chat-btn">Start Chat</button>
+        </div>
+
+        <div class="action-card green">
+          <div class="action-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/3476/3476371.png" alt="Medical History" />
+          </div>
+          <h3 class="action-title">Medical History</h3>
+          <p class="action-description">Review past appointments, prescriptions, and reports</p>
+          <button class="action-btn green" id="history-btn">View History</button>
+        </div>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="bottom-section">
+        <!-- Reminders -->
+        <section class="reminders-section">
+          <div class="section-header">
+            <h2 class="section-title">Today's Reminders</h2>
+          </div>
+          <div class="reminders-list">
+            <% 
+            const reminders = [
+              { title: 'Blood Pressure Medication', time: 'Due at 8:00 PM', icon: 'pills', color: 'orange', completed: false },
+              { title: 'Physical Therapy', time: 'Completed ✓', icon: 'dumbbell', color: 'green', completed: true },
+              { title: 'Temperature Check', time: 'Due at 10:00 PM', icon: 'thermometer-half', color: 'blue', completed: false }
+            ];
+            %>
+            
+            <% reminders.forEach(reminder => { %>
+              <div class="reminder-item">
+                <div class="reminder-icon <%= reminder.color %>">
+                  <i class="fas fa-<%= reminder.icon %>"></i>
+                </div>
+                <div class="reminder-details">
+                  <div class="reminder-title"><%= reminder.title %></div>
+                  <div class="reminder-time"><%= reminder.time %></div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </section>
+
+        <!-- Saved Nurses -->
+        <section class="saved-nurses-section">
+          <div class="section-header">
+            <h2 class="section-title">Saved Nurses</h2>
+          </div>
+          <div class="nurses-grid">
+            <% 
+            const savedNurses = [
+              {
+                name: 'Mitali',
+                rating: 4.9,
+                reviews: 127,
+                image: 'https://www.vhv.rs/dpng/d/427-4278765_placement-for-all-students-indian-nurse-photo-png.png'
+              },
+              {
+                name: 'Manasvi',
+                rating: 4.8,
+                reviews: 89,
+                image: 'https://toppng.com/uploads/preview/why-choose-ihna-indian-nursing-student-11562931490arkyr8bc0k.png'
+              }
+            ];
+            %>
+            
+            <% savedNurses.forEach(nurse => { %>
+              <div class="nurse-card">
+                <img src="<%= nurse.image %>" alt="<%= nurse.name %>" class="nurse-avatar" />
+                <div class="nurse-info">
+                  <div class="nurse-name"><%= nurse.name %></div>
+                  <div class="nurse-rating">
+                    <span class="rating-score"><%= nurse.rating %>⭐</span>
+                    <span class="review-count">(<%= nurse.reviews %> reviews)</span>
+                  </div>
+                </div>
+                <button class="book-again-btn">Book Again</button>
+              </div>
+            <% }); %>
+          </div>
+        </section>
+      </div>
+
+      <div id="prescription-popup" class="popup-overlay" aria-hidden="true">
+        <div class="popup-content" role="dialog" aria-modal="true" aria-labelledby="prescription-title">
+          <h2 id="prescription-title">Your Prescriptions</h2>
+          <ul class="prescription-list">
+            <li><strong>Paracetamol 500mg</strong> – 1 tablet twice a day</li>
+            <li><strong>Amoxicillin 250mg</strong> – 1 capsule three times a day</li>
+            <li><strong>Vitamin D3</strong> – 1 tablet daily after lunch</li>
+          </ul>
+          <button id="close-popup" class="close-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/patient.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!-- views/booking.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - WeCare</title>
+    <link rel="stylesheet" href="/css/booking_style.css">
+</head>
+<body>
+    <%- include('partials/header', { page: 'booking', showLogin: true }) %>
+
+    <div class="container">
+        <!-- Main Booking Section -->
+        <div class="booking-section">
+            <div class="booking-header">
+                <h1>BOOK<br>APPOINTMENT</h1>
+                <div class="nurse-info">
+                    <div class="nurse-name"><%= typeof nurse !== 'undefined' ? nurse.name : 'Loading...' %></div>
+                    <div class="nurse-details"><%= typeof nurse !== 'undefined' ? nurse.specialization : 'Please wait' %></div>
+                </div>
+            </div>
+
+            <div class="booking-form">
+                <div class="date-time-section">
+                    <div class="input-group">
+                        <label>Select Date</label>
+                        <div class="input-with-icon">
+                            <input type="date" class="date-input">
+                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Select Time</label>
+                        <div class="input-with-icon">
+                            <input type="time" class="time-input">
+                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12,6 12,12 16,14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-section">
+                    <label class="service-label">Service Type</label>
+                    <div class="service-options">
+                        <% 
+                        const services = [
+                            { title: 'Consultation', subtitle: 'Video Call', price: 500 },
+                            { title: 'Home visit', subtitle: 'At your location', price: 1200 },
+                            { title: 'Emergency', subtitle: 'Urgent', price: 2000 }
+                        ];
+                        %>
+                        
+                        <% services.forEach(service => { %>
+                            <div class="service-card">
+                                <div class="service-title"><%= service.title %></div>
+                                <div class="service-subtitle"><%= service.subtitle %></div>
+                                <div class="service-price">Rs <%= service.price %></div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-section">
+                <div class="payment-options">
+                    <div class="payment-label">Payment<br>Options</div>
+                    <button class="payment-btn">CARD</button>
+                    <button class="payment-btn">NET BANKING</button>
+                    <button class="payment-btn">WALLET</button>
+                </div>
+                
+                <div class="insurance-section">
+                    <input type="checkbox" id="insurance">
+                    <label for="insurance">I have insurance coverage</label>
+                </div>
+
+                <button class="proceed-btn">Proceed to pay Rs 0</button>
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div class="appointments-section">
+            <h2>Your Appointments</h2>
+            <% if (typeof appointments !== 'undefined' && appointments.length > 0) { %>
+                <% appointments.forEach(appointment => { %>
+                    <div class="appointment-item">
+                        <p><strong><%= appointment.nurse %></strong></p>
+                        <p><%= appointment.date %> at <%= appointment.time %></p>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p style="color: #666;">Loading appointments...</p>
+            <% } %>
+        </div>
+
+        <!-- Booking Summary Section -->
+        <div class="summary-section">
+            <h2>Booking Summary</h2>
+            <div class="summary-details">
+                <div class="summary-row">
+                    <span>Service</span>
+                    <span>Not selected</span>
+                </div>
+                <div class="summary-row">
+                    <span>Date</span>
+                    <span>Not selected</span>
+                </div>
+                <div class="summary-row">
+                    <span>Time</span>
+                    <span>Not selected</span>
+                </div>
+                <div class="summary-row">
+                    <span>Nurse</span>
+                    <span><%= typeof nurse !== 'undefined' ? nurse.name : 'Not selected' %></span>
+                </div>
+            </div>
+            <div class="summary-total">
+                <span>Total</span>
+                <span>Rs. 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/booking_script.js"></script>
+</body>
+</html>

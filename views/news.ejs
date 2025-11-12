@@ -1,0 +1,75 @@
+<!-- views/news.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News</title>
+  <link rel="stylesheet" href="/css/news.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playfair+Display&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <%- include('partials/header', { page: 'news', showLogin: false }) %>
+
+  <!-- Hero/Intro Section -->
+  <section class="news-header">
+    <h1>Latest Updates</h1>
+    <h4>Better Information, Better Health</h4>
+  </section>
+
+  <!-- News Grid -->
+  <section class="news-grid">
+    <% 
+    const newsArticles = [
+      {
+        date: 'Monday 03 March 2022',
+        author: 'NIH',
+        title: 'The Role of Nurses in Improving Health Care Access and Quality',
+        url: 'https://www.ncbi.nlm.nih.gov/books/NBK573910/'
+      },
+      {
+        date: 'Thursday 25 September 2025',
+        author: 'Pooja Toshniwal Paharia',
+        title: 'Roles of a Nurse',
+        url: 'https://www.news-medical.net/health/Roles-of-a-Nurse.aspx'
+      },
+      {
+        date: 'Friday 19 November 2019',
+        author: 'Angelique Hilli',
+        title: 'The roles of nurses in supporting health literacy: a scoping review',
+        url: 'https://www.frontiersin.org/journals/public-health/articles/10.3389/fpubh.2023.1022803/full'
+      },
+      {
+        date: 'Saturday 05 July 2024',
+        author: 'Claire Pentecost',
+        title: 'Patients\' and nurses\' experiences of fundamental nursing care: A systematic review',
+        url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC7319357/'
+      }
+    ];
+    
+    if (typeof articles !== 'undefined') {
+      newsArticles = articles;
+    }
+    %>
+    
+    <% newsArticles.forEach(article => { %>
+      <article class="news-card">
+        <h3><%= article.date %> <span>- By <%= article.author %></span></h3>
+        <p><%= article.title %></p>
+        <a href="<%= article.url %>" target="_blank" class="btn-view">View</a>
+        <div class="card-icons">
+          <i class="fa-solid fa-eye"></i>
+          <span class="view-count">0</span>
+          <i class="fa-regular fa-heart"></i>
+        </div>
+      </article>
+    <% }); %>
+  </section>
+
+  <%- include('partials/footer') %>
+
+  <script src="/js/news.js"></script>
+</body>
+</html>

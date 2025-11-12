@@ -1,0 +1,99 @@
+<!-- views/nurses.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Nurses - WeCare</title>
+  <link rel="stylesheet" href="/css/nurses_style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <%- include('partials/header', { page: 'nurses', showLogin: true }) %>
+
+  <!-- Nurses Page Content -->
+  <div class="nurses-page">
+    <div class="page-header">
+      <h1>Find Your Perfect Nurse</h1>
+      <p>Browse through our verified and experienced healthcare professionals</p>
+    </div>
+
+    <!-- Search Info (appears when redirected from search) -->
+    <div id="search-info"></div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <label>Search by Name</label>
+        <input type="text" id="search-input" placeholder="Search nurses...">
+      </div>
+
+      <div class="filter-group">
+        <label>Specialization</label>
+        <select id="filter-role">
+          <option value="all">All Specializations</option>
+          <option value="General Home Care Nurse">General Home Care</option>
+          <option value="Elderly Care Specialist">Elderly Care</option>
+          <option value="Post-Surgery Care Specialist">Post-Surgery Care</option>
+          <option value="Child Care Nurse">Child Care</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Minimum Rating</label>
+        <select id="filter-rating">
+          <option value="0">All Ratings</option>
+          <option value="4.5">4.5+ Stars</option>
+          <option value="4.0">4.0+ Stars</option>
+          <option value="3.5">3.5+ Stars</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Sort By</label>
+        <select id="sort-select">
+          <option value="default">Default</option>
+          <option value="rating-high">Rating: High to Low</option>
+          <option value="rating-low">Rating: Low to High</option>
+          <option value="distance">Distance: Nearest First</option>
+          <option value="name">Name: A to Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-count" id="results-count"></div>
+
+    <!-- Nurses Container -->
+    <div id="nurses-container">
+      <% if (typeof nurses !== 'undefined' && nurses.length > 0) { %>
+        <% nurses.forEach(nurse => { %>
+          <div class="nurse-card">
+            <img src="<%= nurse.image %>" alt="<%= nurse.name %>">
+            <h3><%= nurse.name %></h3>
+            <p class="specialization"><%= nurse.specialization %></p>
+            <div class="rating">
+              <i class="fas fa-star"></i>
+              <%= nurse.rating %> (<%= nurse.reviews %> reviews)
+            </div>
+            <p class="distance"><i class="fas fa-map-marker-alt"></i> <%= nurse.distance %></p>
+            <a href="/booking?nurse=<%= nurse.id %>">
+              <button class="book-btn">Book Now</button>
+            </a>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p style="text-align: center; color: #666; width: 100%;">Loading nurses...</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script src="/js/nurse.js"></script>
+</body>
+</html>

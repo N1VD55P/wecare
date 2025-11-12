@@ -1,0 +1,62 @@
+<!-- views/prescriptions.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prescriptions - WeCare</title>
+  <link rel="stylesheet" href="/css/prescriptions.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <%- include('partials/header', { page: 'prescriptions', showLogin: false }) %>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <section class="prescription-section">
+      <h1 class="page-title">Your Prescriptions</h1>
+      <p class="page-subtitle">Below are your active prescriptions and dosage details</p>
+
+      <div class="prescription-list">
+        <% 
+        const prescriptions = [
+          {
+            medication: 'Paracetamol 500mg',
+            dosage: 'Take 1 tablet twice daily after meals',
+            doctor: 'Dr. Meera Sharma'
+          },
+          {
+            medication: 'Amoxicillin 250mg',
+            dosage: 'Take 1 capsule three times daily for 5 days',
+            doctor: 'Dr. Kunal Verma'
+          },
+          {
+            medication: 'Vitamin D3',
+            dosage: '1 tablet daily after lunch',
+            doctor: 'Dr. Anjali Singh'
+          }
+        ];
+        %>
+        
+        <% prescriptions.forEach(prescription => { %>
+          <div class="prescription-card">
+            <h3>💊 <%= prescription.medication %></h3>
+            <p><%= prescription.dosage %></p>
+            <p><strong>Prescribed by:</strong> <%= prescription.doctor %></p>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="back-btn-container">
+        <a href="/patientportal" class="back-btn">
+          <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
