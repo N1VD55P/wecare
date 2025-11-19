@@ -10,8 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <%- include('partials/header', { page: 'signup', showLogin: false }) %>
-
   <div class="container">
     <div class="login-box">
       <% if (typeof error !== 'undefined' && error) { %>
@@ -19,10 +17,12 @@
       <% } %>
       <div class="top-bar">
         <div class="logo-area">
-          <img src="/logo.png" alt="WeCare Logo" class="logo-img" />
-          <h2></h2>
+          <a href="/" style="text-decoration: none; color: inherit;">
+            <img src="/logo.png" alt="WeCare Logo" class="logo-img" />
+            <h2></h2>
+          </a>
         </div>
-        <button class="close-btn">
+        <button class="close-btn" type="button" onclick="window.history.back();">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -66,8 +66,6 @@
       </div>
     </div>
   </div>
-
-  <%- include('partials/footer') %>
   <script src="/js/signup.js"></script>
 </body>
 </html>
