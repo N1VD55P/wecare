@@ -116,22 +116,26 @@ body { font-family: Arial, sans-serif;
 
     #nurses-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
       margin-top: 30px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .nurse-card {
       background: white;
       border-radius: 15px;
-      padding: 20px;
+      padding: 15px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 500px;
-      position: relative;
+      min-height: auto;
+      max-height: 380px;
+      overflow: hidden;
     }
 
     .nurse-card:hover {
@@ -139,8 +143,17 @@ body { font-family: Arial, sans-serif;
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
+    .nurse-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 3px solid #1a3d7c;
+      flex-shrink: 0;
+    }
+
     .nurse-image {
-      position: relative;
       width: 120px;
       height: 120px;
       border-radius: 50%;
@@ -155,98 +168,51 @@ body { font-family: Arial, sans-serif;
       object-fit: cover;
     }
 
-    .rate-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #f39c12;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .nurse-info {
+    .nurse-details {
       text-align: center;
       width: 100%;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
     }
 
-    .nurse-info h3 {
-      font-size: 18px;
+    .nurse-name {
+      font-size: 16px;
       font-weight: bold;
       color: #1a3d7c;
       margin: 0;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
 
     .specialization {
       color: #666;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 12px;
       margin: 0;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
 
-    .experience {
-      color: #555;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
+    .nurse-role {
+      color: #666;
+      font-size: 12px;
+      margin: 0;
     }
 
     .rating {
       color: #f39c12;
       font-weight: 500;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
+      font-size: 12px;
+      margin: 3px 0;
+      line-height: 1.2;
     }
 
     .distance {
       color: #666;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      margin: 0;
-    }
-
-    .certifications {
-      background: #f0f0f0;
-      padding: 8px;
-      border-radius: 5px;
       font-size: 12px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .certifications small {
-      display: block;
-    }
-
-    .hourly-rate {
-      color: #1a3d7c;
-      font-size: 16px;
-      font-weight: bold;
-      background: #eaf3ff;
-      padding: 8px 12px;
-      border-radius: 5px;
+      margin: 3px 0;
+      line-height: 1.2;
     }
 
     .nurse-card .book-btn {
@@ -254,13 +220,13 @@ body { font-family: Arial, sans-serif;
       background: #1a3d7c;
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 10px 15px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.3s ease;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .nurse-card .book-btn:hover {
@@ -379,4 +345,115 @@ footer p {
 .footer-col p{
   font-size: 15px;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Login Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #1a3d7c;
+  font-size: 22px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.close {
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.3s;
+  line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+}
+
+.modal-body {
+  padding: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  border-radius: 0 0 12px 12px;
+}
+
+.modal-btn-cancel,
+.modal-btn-login {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.modal-btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #d0d0d0;
+}
+
+.modal-btn-login {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.modal-btn-login:hover {
+  background-color: #1558cc;
 }

@@ -30,6 +30,220 @@
 
         <!-- Profile photo -->
         <div class="input-group">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #eaf3ff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .profile-header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .profile-header h1 {
+      color: #011941;
+      font-size: 32px;
+      margin: 0;
+      font-family: 'Playwrite AU VIC Guides', serif;
+    }
+    
+    .profile-header p {
+      color: #666;
+      font-size: 14px;
+      margin: 5px 0 0 0;
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .header-buttons a {
+      padding: 10px 20px;
+      background: #4a90e2;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: 500;
+      transition: background 0.3s;
+    }
+    
+    .header-buttons a:hover {
+      background: #1a3d7c;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 1200px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .column {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    
+    .column h2 {
+      color: #011941;
+      font-size: 22px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #4a90e2;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      color: #333;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
+    }
+    
+    .form-group small {
+      display: block;
+      color: #999;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    
+    .photo-preview {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+    
+    .photo-preview img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #4a90e2;
+    }
+    
+    .section-title {
+      color: #4a90e2;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 20px;
+    }
+    
+    .submit-btn:hover {
+      background: #1a3d7c;
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-header">
+    <div>
+      <h1>My Profile</h1>
+      <p>Update your personal information</p>
+    </div>
+    <div class="header-buttons">
+      <a href="/patientportal">← Back</a>
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+
+  <form action="/profile" method="POST" enctype="multipart/form-data">
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="success-message"><%= success %></div>
+    <% } %>
+
+    <div class="container">
+      <!-- Left Column: Personal Information -->
+      <div class="column">
+        <h2>Personal Information</h2>
+
+        <div class="form-group">
           <label for="photo">Profile Photo</label>
           
           <% if (user.profile && user.profile.photo) { %>
@@ -37,6 +251,8 @@
               <img src="<%= user.profile.photo %>" 
                    alt="Profile photo"
                    style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #1a3d7c;" />
+            <div class="photo-preview">
+              <img src="<%= user.profile.photo %>" alt="Profile Photo" />
             </div>
           <% } %>
 
@@ -77,8 +293,40 @@
             <option value="male"   <%= user.profile?.gender === 'male' ? 'selected' : '' %>>Male</option>
             <option value="female" <%= user.profile?.gender === 'female' ? 'selected' : '' %>>Female</option>
             <option value="other"  <%= user.profile?.gender === 'other' ? 'selected' : '' %>>Other</option>
+          <small>Upload a square image for best results. Max 5MB.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" value="<%= user.name %>" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= user.email %>" readonly style="background-color: #f5f5f5; cursor: not-allowed;" />
+          <small>Email cannot be changed</small>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="text" id="phone" name="phone" value="<%= user.profile && user.profile.phone ? user.profile.phone : '' %>" placeholder="Your phone number" />
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" name="dob" value="<%= user.profile && user.profile.dob ? user.profile.dob.toISOString().slice(0,10) : '' %>" />
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender">
+            <option value="">Select...</option>
+            <option value="male" <%= user.profile && user.profile.gender === 'male' ? 'selected' : '' %>>Male</option>
+            <option value="female" <%= user.profile && user.profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+            <option value="other" <%= user.profile && user.profile.gender === 'other' ? 'selected' : '' %>>Other</option>
           </select>
         </div>
+      </div>
 
         <!-- Address -->
         <div class="input-group">
@@ -126,11 +374,54 @@
 
       <div style="margin-top:12px;text-align:center;">
         <a href="/logout" class="logout-profile-btn">Logout</a>
+      <!-- Right Column: Address & Medical Info -->
+      <div class="column">
+        <h2>Address Information</h2>
+
+        <div class="form-group">
+          <label for="address">Street Address</label>
+          <input type="text" id="address" name="address" value="<%= user.profile && user.profile.address ? user.profile.address : '' %>" placeholder="123 Main Street" />
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+          <input type="text" id="city" name="city" value="<%= user.profile && user.profile.city ? user.profile.city : '' %>" placeholder="Your city" />
+        </div>
+
+        <div class="form-group">
+          <label for="state">State / Province</label>
+          <input type="text" id="state" name="state" value="<%= user.profile && user.profile.state ? user.profile.state : '' %>" placeholder="Your state" />
+        </div>
+
+        <div class="form-group">
+          <label for="zip">ZIP / Postal Code</label>
+          <input type="text" id="zip" name="zip" value="<%= user.profile && user.profile.zip ? user.profile.zip : '' %>" placeholder="Your ZIP code" />
+        </div>
+
+        <p class="section-title">Emergency Contact</p>
+
+        <div class="form-group">
+          <label for="emergencyContact">Emergency Contact Name</label>
+          <input type="text" id="emergencyContact" name="emergencyContact" value="<%= user.profile && user.profile.emergencyContact ? user.profile.emergencyContact : '' %>" placeholder="Contact person name" />
+        </div>
+
+        <p class="section-title">Medical Information</p>
+
+        <div class="form-group">
+          <label for="notes">Medical Notes / Allergies</label>
+          <textarea id="notes" name="notes" rows="5" placeholder="Add any medical information, allergies, or special notes..."><%= user.profile && user.profile.notes ? user.profile.notes : '' %></textarea>
+        </div>
       </div>
 
     </div>
-  </div>
 
   <script src="/js/profile.js"></script>
+</body>
+</html>
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.05);">
+      <button type="submit" class="submit-btn">💾 Save All Changes</button>
+    </div>
+  </form>
+
 </body>
 </html>

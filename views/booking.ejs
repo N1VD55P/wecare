@@ -16,8 +16,23 @@
             <div class="booking-header">
                 <h1>BOOK<br>APPOINTMENT</h1>
                 <div class="nurse-info">
-                    <div class="nurse-name"><%= typeof nurse !== 'undefined' ? nurse.name : 'Loading...' %></div>
-                    <div class="nurse-details"><%= typeof nurse !== 'undefined' ? nurse.specialization : 'Please wait' %></div>
+                    <% if (typeof nurse !== 'undefined' && nurse) { %>
+                        <% if (nurse.profileImage) { %>
+                            <div class="nurse-image-small">
+                                <img src="<%= nurse.profileImage || 'https://via.placeholder.com/80?text=No+Photo' %>" alt="<%= nurse.name %>">
+                            </div>
+                        <% } %>
+                        <div class="nurse-details-content">
+                            <div class="nurse-name"><%= nurse.name %></div>
+                            <div class="nurse-details"><%= nurse.specialization %></div>
+                            <% if (nurse.rating) { %>
+                                <div class="nurse-rating">⭐ <%= nurse.rating %> Rating</div>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="nurse-name">Loading...</div>
+                        <div class="nurse-details">Please wait</div>
+                    <% } %>
                 </div>
             </div>
 
@@ -129,6 +144,20 @@
         </div>
     </div>
 
+    <!-- Pass nurse data to JavaScript -->
+    <% if (typeof nurse !== 'undefined' && nurse) { %>
+        <script>
+            window.nurseData = {
+                id: "<%= nurse._id %>",
+                name: "<%= nurse.name %>",
+                specialization: "<%= nurse.specialization %>",
+                rating: "<%= nurse.rating || 0 %>",
+                profileImage: "<%= nurse.profileImage %>",
+                hourlyRate: "<%= nurse.hourlyRate %>"
+            };
+            window.selectedNurse = window.nurseData;
+        </script>
+    <% } %>
     <script src="/js/booking_script.js"></script>
 </body>
 </html>

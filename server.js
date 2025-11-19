@@ -128,6 +128,60 @@ app.get('/nurses', async (req, res) => {
   try {
     const dbNurses = await Nurse.find({ isActive: true }).lean();
     res.render('nurses', { page: 'nurses', nurses: dbNurses });
+    console.log('Fetched nurses from DB:', dbNurses.length, 'nurses');
+    
+    // If nurses exist in database, use them; otherwise use default data
+    const nurses = dbNurses.length > 0 ? dbNurses.map(nurse => ({
+      id: nurse._id,
+      name: nurse.name,
+      specialization: nurse.specialization,
+      rating: nurse.rating,
+      reviews: nurse.reviews,
+      distance: nurse.distance,
+      image: nurse.profileImage
+    })) : [
+      {
+        id: 1,
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        reviews: 145,
+        distance: '2.5 km away',
+        image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      },
+      {
+        id: 2,
+        name: 'Anjali Kumar',
+        specialization: 'Elderly Care Specialist',
+        rating: 4.9,
+        reviews: 203,
+        distance: '1.2 km away',
+        image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg'
+      },
+      {
+        id: 3,
+        name: 'Neha Patel',
+        specialization: 'Post-Surgery Care Specialist',
+        rating: 4.5,
+        reviews: 98,
+        distance: '3.1 km away',
+        image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg'
+      },
+      {
+        id: 4,
+        name: 'Meera Singh',
+        specialization: 'Child Care Nurse',
+        rating: 4.7,
+        reviews: 167,
+        distance: '2.8 km away',
+        image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg'
+      }
+    ];
+    
+    res.render('nurses', { 
+      page: 'nurses',
+      nurses: nurses
+    });
   } catch (err) {
     res.render('nurses', { page: 'nurses', nurses: [] });
   }
@@ -138,6 +192,47 @@ app.get('/booking', (req, res) => {
   const nurseId = req.query.nurse;
   const nurse = { id: nurseId, name: 'Priya Sharma', specialization: 'General Home Care Nurse' };
   res.render('booking', { page: 'booking', nurse, appointments: [] });
+app.get('/booking', async (req, res) => {
+  const nurseId = req.query.nurse;
+  
+  try {
+    let nurse = null;
+    
+    // If nurseId is provided, fetch from database
+    if (nurseId) {
+      nurse = await Nurse.findById(nurseId).lean();
+    }
+    
+    // Fallback to default nurse if not found
+    if (!nurse) {
+      nurse = {
+        _id: 'default',
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      };
+    }
+    
+    res.render('booking', { 
+      page: 'booking',
+      nurse: nurse,
+      appointments: []
+    });
+  } catch (err) {
+    console.error('Error fetching nurse for booking:', err);
+    res.render('booking', { 
+      page: 'booking',
+      nurse: {
+        _id: 'default',
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      },
+      appointments: []
+    });
+  }
 });
 
 // Login page
@@ -183,6 +278,21 @@ app.post('/signup', async (req, res) => {
         profileImage: 'default.png',
         isActive: true
       });
+      try {
+        const nurseRecord = await Nurse.create({
+          userId: newUser._id,
+          name: newUser.name,
+          specialization: 'General Nursing',
+          rating: 4.5,
+          reviews: 0,
+          distance: '0 km away',
+          profileImage: '', // Empty - nurse should upload their own photo
+          isActive: true
+        });
+        console.log('Nurse profile created successfully:', nurseRecord._id, 'Name:', nurseRecord.name);
+      } catch (nurseErr) {
+        console.error('Error creating nurse profile:', nurseErr.message);
+      }
     }
 
     req.session.userId = newUser._id;
@@ -204,6 +314,8 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(401).render('login', { error: 'Invalid credentials.' });
 
+    console.log('User found:', { email: user.email, role: user.role, _id: user._id });
+
     const match = await user.comparePassword(password);
     if (!match) return res.status(401).render('login', { error: 'Invalid credentials.' });
 
@@ -217,6 +329,18 @@ app.post('/login', async (req, res) => {
     if (user.role === 'nurse') return res.redirect('/nurseportal');
     return res.redirect('/patientportal');
 
+    // Create session and redirect based on user's actual role (from database)
+    req.session.userId = user._id;
+    req.session.role = user.role;
+    console.log('Login successful for', email, 'with role:', user.role);
+    console.log('Session set:', { userId: req.session.userId, role: req.session.role });
+    
+    if (user.role === 'nurse') {
+      console.log('Redirecting to nurse portal');
+      return res.redirect('/nurseportal');
+    }
+    console.log('Redirecting to patient portal');
+    return res.redirect('/patientportal');
   } catch (err) {
     return res.status(500).render('login', { error: 'Server error.' });
   }
@@ -264,6 +388,101 @@ app.get('/prescriptions', (req, res) => {
 
   res.render('prescriptions', { prescriptions });
 });
+// Dev-only: list users (email + role only) for quick verification
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/debug/users', async (req, res) => {
+    try {
+      const users = await User.find({}, 'email role createdAt').lean();
+      return res.json({ ok: true, count: users.length, users });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Debug endpoint to check nurses in database
+  app.get('/debug/nurses', async (req, res) => {
+    try {
+      const allNurses = await Nurse.find({}).lean();
+      const activeNurses = await Nurse.find({ isActive: true }).lean();
+      return res.json({ 
+        ok: true, 
+        total: allNurses.length, 
+        active: activeNurses.length, 
+        allNurses,
+        activeNurses
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to activate all nurses
+  app.get('/admin/activate-nurses', async (req, res) => {
+    try {
+      const result = await Nurse.updateMany({}, { isActive: true });
+      return res.json({ ok: true, modified: result.modifiedCount });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to fix a user's role by email (for testing)
+  app.get('/admin/fix-user-role/:email/:role', async (req, res) => {
+    try {
+      const { email, role } = req.params;
+      if (!['patient', 'nurse', 'admin'].includes(role)) {
+        return res.json({ ok: false, error: 'Invalid role. Must be patient, nurse, or admin' });
+      }
+      const result = await User.updateOne(
+        { email: email.toLowerCase().trim() },
+        { role: role }
+      );
+      return res.json({ ok: true, modified: result.modifiedCount, email, role });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to fix Nurse collection - remove duplicates and drop bad indexes
+  app.get('/admin/fix-nurse-index', async (req, res) => {
+    try {
+      // Drop the problematic email index if it exists
+      try {
+        await Nurse.collection.dropIndex('email_1');
+        console.log('Dropped email_1 index');
+      } catch (indexErr) {
+        console.log('No email_1 index to drop or already dropped');
+      }
+
+      // Remove duplicate nurse records (keep only the first one per userId)
+      const allNurses = await Nurse.find({}).sort({ createdAt: 1 });
+      const seenUserIds = new Set();
+      const duplicates = [];
+
+      for (const nurse of allNurses) {
+        if (seenUserIds.has(nurse.userId.toString())) {
+          duplicates.push(nurse._id);
+        } else {
+          seenUserIds.add(nurse.userId.toString());
+        }
+      }
+
+      if (duplicates.length > 0) {
+        const deleteResult = await Nurse.deleteMany({ _id: { $in: duplicates } });
+        console.log('Deleted duplicate nurses:', deleteResult.deletedCount);
+      }
+
+      return res.json({ 
+        ok: true, 
+        indexDropped: true, 
+        duplicatesRemoved: duplicates.length,
+        message: 'Nurse collection fixed!'
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+}
 
 // Logout
 app.get('/logout', (req, res) => {

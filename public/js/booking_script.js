@@ -191,8 +191,6 @@ function setupProceedButton() {
     appointments.push(appointment);
     localStorage.setItem('appointments', JSON.stringify(appointments));
     
-    alert('Appointment booked successfully!');
-    
     window.location.href = 'index.html';
   });
 }
