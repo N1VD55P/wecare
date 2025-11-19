@@ -326,6 +326,96 @@ body {
 }
 .close-btn:hover { background:#0059b3; }
 
+/* Footer Styles */
+footer {
+  background: #eaf3ff;
+  padding: 20px 10%;
+  text-align: center;
+  margin-top: 40px;
+  border-top: 2px solid #dce6f5;
+}
+
+footer h2 {
+  color: #1a3d7c;
+  margin-bottom: 5px;
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+}
+
+footer p {
+  margin-bottom: 10px;
+  color: #3f3f3f;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 16px;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.footer-col {
+  flex: 1;
+  margin: 10px;
+  min-width: 200px;
+}
+
+.footer-col h4 {
+  margin-bottom: 10px;
+  color: #1a3d7c;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-weight: 600;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+.footer-col ul li {
+  margin-bottom: 8px;
+  color: #404040;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.footer-col ul li a {
+  color: #404040;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-col ul li a:hover,
+.footer-col ul li:hover {
+  color: #1a73e8;
+}
+
+.footer-col p {
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 5px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #393838;
+  padding-top: 10px;
+  font-size: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer-bottom p {
+  color: #666;
+  margin: 0;
+}
+
 /* small animation */
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
