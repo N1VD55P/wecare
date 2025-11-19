@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <%- include('partials/header', { page: 'signup', showLogin: false }) %>
+
   <div class="container">
     <div class="login-box">
       <% if (typeof error !== 'undefined' && error) { %>
@@ -64,6 +66,8 @@
       </div>
     </div>
   </div>
+
+  <%- include('partials/footer') %>
   <script src="/js/signup.js"></script>
 </body>
 </html>

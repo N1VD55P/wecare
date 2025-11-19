@@ -15,7 +15,7 @@
       <div class="header-content">
         <div class="welcome-section">
             <h1 class="welcome-title">Welcome back, <%= typeof patient !== 'undefined' ? patient.name : 'Advi' %>!</h1>
-            <p><a href="/profile">Edit Profile</a></p>
+            <p><a href="/profile">Edit Profile</a> | <a href="/">Home</a> | <a href="/nurses">Find Nurses</a></p>
           <p class="welcome-subtitle">Here's your health overview for today</p>
         </div>
         <div class="header-actions">
@@ -196,6 +196,8 @@
       </div>
     </div>
   </main>
+
+  <%- include('partials/footer') %>
 
   <script src="/js/patient.js"></script>
 </body>
