@@ -15,12 +15,7 @@
       <div class="header-content">
         <div class="welcome-section">
             <h1 class="welcome-title">Welcome back, <%= typeof patient !== 'undefined' ? patient.name : 'Advi' %>!</h1>
-            <div class="edit-profile-block">
-              <a href="/profile" class="edit-profile-link">
-                <img src="<%= patient && patient.profileImage ? patient.profileImage : '/assets/default-avatar.png' %>" alt="Profile Image" class="profile-img-edit" />
-                Edit Profile
-              </a>
-            </div>
+            <p><a href="/profile" class="edit-profile-btn">Edit Profile</a></p>
           <p class="welcome-subtitle">Here's your health overview for today</p>
         </div>
         <div class="header-actions">
@@ -69,7 +64,7 @@
                 <div class="appointment-time"><%= appointment.time %></div>
               </div>
               <% if (appointment.canJoin) { %>
-                <button class="request-call-btn" onclick="requestCall(this)">Request Call</button>
+                <button class="join-call-btn request-call-btn">Request Call</button>
               <% } else { %>
                 <button class="reschedule-btn">Reschedule</button>
               <% } %>
@@ -95,7 +90,8 @@
           </div>
           <h3 class="action-title">View Prescriptions</h3>
           <p class="action-description">Access your current medications and dosages</p>
-          <button class="action-btn green" id="prescription-btn">View All</button>
+          <a href="/patient/prescriptions" id="prescription-btn">View All</a>
+
         </div>
 
         <div class="action-card blue">
@@ -119,17 +115,6 @@
 
       <!-- Bottom Section -->
       <div class="bottom-section">
-
-          <!-- Footer Include -->
-          <%- include('partials/footer') %>
-
-        <script>
-        function requestCall(btn) {
-          btn.textContent = 'Requested';
-          btn.classList.add('requested');
-          btn.disabled = true;
-        }
-        </script>
         <!-- Reminders -->
         <section class="reminders-section">
           <div class="section-header">
@@ -215,5 +200,23 @@
   <%- include('partials/footer') %>
 
   <script src="/js/patient.js"></script>
+</script>
+<script>
+// Ensure Request Call button works for EJS-rendered and dynamic appointments
+function setupRequestCallButtons() {
+  document.querySelectorAll('.request-call-btn').forEach(function(btn) {
+    if (!btn.dataset.listener) {
+      btn.addEventListener('click', function() {
+        btn.textContent = 'Requested';
+        btn.disabled = true;
+        btn.classList.add('requested');
+      });
+      btn.dataset.listener = 'true';
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', setupRequestCallButtons);
+// If you render appointments dynamically, call setupRequestCallButtons() after rendering.
+</script>
 </body>
 </html>
