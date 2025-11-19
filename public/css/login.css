@@ -107,6 +107,13 @@ body {
   color: white;
 }
 
+/* Active role button */
+.role-btn.active {
+  background: #1a3d7c;
+  color: white;
+  border-color: #1a3d7c;
+}
+
 /* Input styling */
 .input-group {
   text-align: left;
@@ -190,6 +197,28 @@ body {
 
 .signup-link a:hover {
   text-decoration: underline;
+}
+
+/* Error message */
+.error-message {
+  background: #fff0f0;
+  border: 1px solid #ffb3b3;
+  color: #8b0000;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+/* Success message */
+.success-message {
+  background: #f0fff4;
+  border: 1px solid #b6f0c6;
+  color: #0b6623;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: left;
 }
 
 /* Animation */
