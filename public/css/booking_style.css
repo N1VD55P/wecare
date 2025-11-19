@@ -73,11 +73,41 @@ body { font-family: Arial, sans-serif;
 .booking-header h1 { 
   font-size: 28px; font-weight: bold; color: #1a3d7c; }
 .nurse-info { 
-  background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #e9ecef; min-width: 200px; }
+  background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #e9ecef; min-width: 200px;
+  display: flex; gap: 15px; align-items: center;
+}
+
+.nurse-image-small {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #1a3d7c;
+  flex-shrink: 0;
+}
+
+.nurse-image-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nurse-details-content {
+  flex: 1;
+}
+
 .nurse-name { 
-  font-size: 18px; font-weight: bold; color: #333; }
-.nurse-details, .nurse-rating { 
-  font-size: 12px; color: #666; }
+  font-size: 18px; font-weight: bold; color: #333; margin-bottom: 4px;
+}
+.nurse-details { 
+  font-size: 12px; color: #666; margin-bottom: 4px;
+}
+
+.nurse-rating {
+  font-size: 13px;
+  color: #f39c12;
+  font-weight: 500;
+}
 
 .date-time-section { 
   display: flex; gap: 15px; margin-bottom: 25px; }

@@ -164,6 +164,7 @@ app.get('/nurses', async (req, res) => {
   try {
     // Fetch all active nurses from database
     const dbNurses = await Nurse.find({ isActive: true }).lean();
+    console.log('Fetched nurses from DB:', dbNurses.length, 'nurses');
     
     // If nurses exist in database, use them; otherwise use default data
     const nurses = dbNurses.length > 0 ? dbNurses.map(nurse => ({
@@ -226,21 +227,47 @@ app.get('/nurses', async (req, res) => {
   }
 });
 
-app.get('/booking', (req, res) => {
+app.get('/booking', async (req, res) => {
   const nurseId = req.query.nurse;
   
-  // In production, fetch nurse details from database
-  const nurse = {
-    id: nurseId,
-    name: 'Priya Sharma',
-    specialization: 'General Home Care Nurse'
-  };
-  
-  res.render('booking', { 
-    page: 'booking',
-    nurse: nurse,
-    appointments: []
-  });
+  try {
+    let nurse = null;
+    
+    // If nurseId is provided, fetch from database
+    if (nurseId) {
+      nurse = await Nurse.findById(nurseId).lean();
+    }
+    
+    // Fallback to default nurse if not found
+    if (!nurse) {
+      nurse = {
+        _id: 'default',
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      };
+    }
+    
+    res.render('booking', { 
+      page: 'booking',
+      nurse: nurse,
+      appointments: []
+    });
+  } catch (err) {
+    console.error('Error fetching nurse for booking:', err);
+    res.render('booking', { 
+      page: 'booking',
+      nurse: {
+        _id: 'default',
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      },
+      appointments: []
+    });
+  }
 });
 
 app.get('/login', (req, res) => {
@@ -286,19 +313,19 @@ app.post('/signup', async (req, res) => {
     // If new user is a nurse, automatically create a nurse profile in Nurses collection
     if (newUser.role === 'nurse') {
       try {
-        await Nurse.create({
+        const nurseRecord = await Nurse.create({
           userId: newUser._id,
           name: newUser.name,
           specialization: 'General Nursing',
           rating: 4.5,
           reviews: 0,
           distance: '0 km away',
-          profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg',
+          profileImage: '', // Empty - nurse should upload their own photo
           isActive: true
         });
-        console.log('Nurse profile created for:', newUser.email);
+        console.log('Nurse profile created successfully:', nurseRecord._id, 'Name:', nurseRecord.name);
       } catch (nurseErr) {
-        console.error('Error creating nurse profile:', nurseErr);
+        console.error('Error creating nurse profile:', nurseErr.message);
       }
     }
     
@@ -325,22 +352,26 @@ app.post('/login', async (req, res) => {
       return res.status(401).render('login', { error: 'Invalid email or password.' });
     }
 
+    console.log('User found:', { email: user.email, role: user.role, _id: user._id });
+
     const match = await user.comparePassword(password);
     console.log('Password match for', email, ':', !!match);
     if (!match) {
       return res.status(401).render('login', { error: 'Invalid email or password.' });
     }
 
-    // If the client selected a role, ensure it matches the account role
-    if (selectedRole && selectedRole !== user.role) {
-      return res.status(403).render('login', { error: `Selected role (${selectedRole}) does not match account role.` });
+    // Create session and redirect based on user's actual role (from database)
+    req.session.userId = user._id;
+    req.session.role = user.role;
+    console.log('Login successful for', email, 'with role:', user.role);
+    console.log('Session set:', { userId: req.session.userId, role: req.session.role });
+    
+    if (user.role === 'nurse') {
+      console.log('Redirecting to nurse portal');
+      return res.redirect('/nurseportal');
     }
-
-  // Create session and redirect based on user's role
-  req.session.userId = user._id;
-  req.session.role = user.role;
-  if (user.role === 'nurse') return res.redirect('/nurseportal');
-  return res.redirect('/patientportal');
+    console.log('Redirecting to patient portal');
+    return res.redirect('/patientportal');
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).render('login', { error: 'Internal server error. Please try again.' });
@@ -521,6 +552,90 @@ if (process.env.NODE_ENV !== 'production') {
     try {
       const users = await User.find({}, 'email role createdAt').lean();
       return res.json({ ok: true, count: users.length, users });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Debug endpoint to check nurses in database
+  app.get('/debug/nurses', async (req, res) => {
+    try {
+      const allNurses = await Nurse.find({}).lean();
+      const activeNurses = await Nurse.find({ isActive: true }).lean();
+      return res.json({ 
+        ok: true, 
+        total: allNurses.length, 
+        active: activeNurses.length, 
+        allNurses,
+        activeNurses
+      });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to activate all nurses
+  app.get('/admin/activate-nurses', async (req, res) => {
+    try {
+      const result = await Nurse.updateMany({}, { isActive: true });
+      return res.json({ ok: true, modified: result.modifiedCount });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to fix a user's role by email (for testing)
+  app.get('/admin/fix-user-role/:email/:role', async (req, res) => {
+    try {
+      const { email, role } = req.params;
+      if (!['patient', 'nurse', 'admin'].includes(role)) {
+        return res.json({ ok: false, error: 'Invalid role. Must be patient, nurse, or admin' });
+      }
+      const result = await User.updateOne(
+        { email: email.toLowerCase().trim() },
+        { role: role }
+      );
+      return res.json({ ok: true, modified: result.modifiedCount, email, role });
+    } catch (err) {
+      return res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Admin endpoint to fix Nurse collection - remove duplicates and drop bad indexes
+  app.get('/admin/fix-nurse-index', async (req, res) => {
+    try {
+      // Drop the problematic email index if it exists
+      try {
+        await Nurse.collection.dropIndex('email_1');
+        console.log('Dropped email_1 index');
+      } catch (indexErr) {
+        console.log('No email_1 index to drop or already dropped');
+      }
+
+      // Remove duplicate nurse records (keep only the first one per userId)
+      const allNurses = await Nurse.find({}).sort({ createdAt: 1 });
+      const seenUserIds = new Set();
+      const duplicates = [];
+
+      for (const nurse of allNurses) {
+        if (seenUserIds.has(nurse.userId.toString())) {
+          duplicates.push(nurse._id);
+        } else {
+          seenUserIds.add(nurse.userId.toString());
+        }
+      }
+
+      if (duplicates.length > 0) {
+        const deleteResult = await Nurse.deleteMany({ _id: { $in: duplicates } });
+        console.log('Deleted duplicate nurses:', deleteResult.deletedCount);
+      }
+
+      return res.json({ 
+        ok: true, 
+        indexDropped: true, 
+        duplicatesRemoved: duplicates.length,
+        message: 'Nurse collection fixed!'
+      });
     } catch (err) {
       return res.status(500).json({ ok: false, error: err.message });
     }
