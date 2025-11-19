@@ -127,7 +127,6 @@ app.get('/', async (req, res) => {
 app.get('/nurses', async (req, res) => {
   try {
     const dbNurses = await Nurse.find({ isActive: true }).lean();
-    res.render('nurses', { page: 'nurses', nurses: dbNurses });
     console.log('Fetched nurses from DB:', dbNurses.length, 'nurses');
     
     // If nurses exist in database, use them; otherwise use default data
@@ -188,10 +187,6 @@ app.get('/nurses', async (req, res) => {
 });
 
 // Booking page
-app.get('/booking', (req, res) => {
-  const nurseId = req.query.nurse;
-  const nurse = { id: nurseId, name: 'Priya Sharma', specialization: 'General Home Care Nurse' };
-  res.render('booking', { page: 'booking', nurse, appointments: [] });
 app.get('/booking', async (req, res) => {
   const nurseId = req.query.nurse;
   
@@ -268,16 +263,6 @@ app.post('/signup', async (req, res) => {
     const newUser = await User.create({ name, email, password, role: role || 'patient' });
 
     if (newUser.role === 'nurse') {
-      await Nurse.create({
-        userId: newUser._id,
-        name: newUser.name,
-        specialization: 'General Nursing',
-        rating: 4.5,
-        reviews: 0,
-        distance: '0 km',
-        profileImage: 'default.png',
-        isActive: true
-      });
       try {
         const nurseRecord = await Nurse.create({
           userId: newUser._id,
@@ -319,40 +304,43 @@ app.post('/login', async (req, res) => {
     const match = await user.comparePassword(password);
     if (!match) return res.status(401).render('login', { error: 'Invalid credentials.' });
 
-    if (selectedRole && selectedRole !== user.role) {
-      return res.status(403).render('login', { error: 'Role mismatch.' });
-    }
-
+    // Set session BEFORE any checks
     req.session.userId = user._id;
     req.session.role = user.role;
+    
+    console.log('Session set:', { userId: req.session.userId, role: req.session.role });
 
     if (user.role === 'nurse') return res.redirect('/nurseportal');
     return res.redirect('/patientportal');
 
-    // Create session and redirect based on user's actual role (from database)
-    req.session.userId = user._id;
-    req.session.role = user.role;
-    console.log('Login successful for', email, 'with role:', user.role);
-    console.log('Session set:', { userId: req.session.userId, role: req.session.role });
-    
-    if (user.role === 'nurse') {
-      console.log('Redirecting to nurse portal');
-      return res.redirect('/nurseportal');
-    }
-    console.log('Redirecting to patient portal');
-    return res.redirect('/patientportal');
   } catch (err) {
+    console.error('Login error:', err);
     return res.status(500).render('login', { error: 'Server error.' });
   }
 });
 
 // Patient portal
-app.get('/patientportal', (req, res) => {
-  if (!req.session.userId) return res.redirect('/login');
-  if (req.session.role !== 'patient') return res.status(403).send('Forbidden');
+app.get('/patientportal', async (req, res) => {
+  if (!req.session.userId) {
+    console.log('No session, redirecting to login');
+    return res.redirect('/login');
+  }
+  
+  if (req.session.role !== 'patient') {
+    console.log('Wrong role:', req.session.role, '- Access denied');
+    return res.status(403).send('Forbidden');
+  }
   
   const user = res.locals.currentUser || {};
-  res.render('patientportal', { patient: user });
+  
+  // Fetch any 2 nurses from database
+  try {
+    const savedNurses = await Nurse.find({ isActive: true }).limit(2).lean();
+    res.render('patientportal', { patient: user, savedNurses });
+  } catch (err) {
+    console.error('Error fetching saved nurses:', err);
+    res.render('patientportal', { patient: user, savedNurses: [] });
+  }
 });
 
 // Nurse portal
@@ -388,101 +376,6 @@ app.get('/prescriptions', (req, res) => {
 
   res.render('prescriptions', { prescriptions });
 });
-// Dev-only: list users (email + role only) for quick verification
-if (process.env.NODE_ENV !== 'production') {
-  app.get('/debug/users', async (req, res) => {
-    try {
-      const users = await User.find({}, 'email role createdAt').lean();
-      return res.json({ ok: true, count: users.length, users });
-    } catch (err) {
-      return res.status(500).json({ ok: false, error: err.message });
-    }
-  });
-
-  // Debug endpoint to check nurses in database
-  app.get('/debug/nurses', async (req, res) => {
-    try {
-      const allNurses = await Nurse.find({}).lean();
-      const activeNurses = await Nurse.find({ isActive: true }).lean();
-      return res.json({ 
-        ok: true, 
-        total: allNurses.length, 
-        active: activeNurses.length, 
-        allNurses,
-        activeNurses
-      });
-    } catch (err) {
-      return res.status(500).json({ ok: false, error: err.message });
-    }
-  });
-
-  // Admin endpoint to activate all nurses
-  app.get('/admin/activate-nurses', async (req, res) => {
-    try {
-      const result = await Nurse.updateMany({}, { isActive: true });
-      return res.json({ ok: true, modified: result.modifiedCount });
-    } catch (err) {
-      return res.status(500).json({ ok: false, error: err.message });
-    }
-  });
-
-  // Admin endpoint to fix a user's role by email (for testing)
-  app.get('/admin/fix-user-role/:email/:role', async (req, res) => {
-    try {
-      const { email, role } = req.params;
-      if (!['patient', 'nurse', 'admin'].includes(role)) {
-        return res.json({ ok: false, error: 'Invalid role. Must be patient, nurse, or admin' });
-      }
-      const result = await User.updateOne(
-        { email: email.toLowerCase().trim() },
-        { role: role }
-      );
-      return res.json({ ok: true, modified: result.modifiedCount, email, role });
-    } catch (err) {
-      return res.status(500).json({ ok: false, error: err.message });
-    }
-  });
-
-  // Admin endpoint to fix Nurse collection - remove duplicates and drop bad indexes
-  app.get('/admin/fix-nurse-index', async (req, res) => {
-    try {
-      // Drop the problematic email index if it exists
-      try {
-        await Nurse.collection.dropIndex('email_1');
-        console.log('Dropped email_1 index');
-      } catch (indexErr) {
-        console.log('No email_1 index to drop or already dropped');
-      }
-
-      // Remove duplicate nurse records (keep only the first one per userId)
-      const allNurses = await Nurse.find({}).sort({ createdAt: 1 });
-      const seenUserIds = new Set();
-      const duplicates = [];
-
-      for (const nurse of allNurses) {
-        if (seenUserIds.has(nurse.userId.toString())) {
-          duplicates.push(nurse._id);
-        } else {
-          seenUserIds.add(nurse.userId.toString());
-        }
-      }
-
-      if (duplicates.length > 0) {
-        const deleteResult = await Nurse.deleteMany({ _id: { $in: duplicates } });
-        console.log('Deleted duplicate nurses:', deleteResult.deletedCount);
-      }
-
-      return res.json({ 
-        ok: true, 
-        indexDropped: true, 
-        duplicatesRemoved: duplicates.length,
-        message: 'Nurse collection fixed!'
-      });
-    } catch (err) {
-      return res.status(500).json({ ok: false, error: err.message });
-    }
-  });
-}
 
 // Logout
 app.get('/logout', (req, res) => {
