@@ -316,7 +316,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     res.clearCookie('connect.sid');
-    return res.redirect('/login');
+    return res.redirect('/');
   });
 });
 
