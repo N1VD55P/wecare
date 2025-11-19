@@ -100,35 +100,25 @@
 
     <div class="doctors-container">
       <% 
-      // Use dynamic data if available, otherwise use default data
+      // Use dynamic data from database if available
       const displayDoctors = typeof featuredNurses !== 'undefined' && featuredNurses.length > 0 
         ? featuredNurses 
         : [
-            { name: 'Medha Shankar', role: 'Physiotherapist', rating: 4.8, image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg' },
-            { name: 'Janvi Malik', role: 'Cardiologist', rating: 4.9, image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg' },
-            { name: 'Ashwika Mittal', role: 'Dermatologist', rating: 4.5, image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg' },
-            { name: 'Avni Gupta', role: 'Orthopedic Surgeon', rating: 4.0, image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg' }
+            { name: 'Medha Shankar', specialization: 'Physiotherapist', rating: 4.8, image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg' },
+            { name: 'Janvi Malik', specialization: 'Cardiologist', rating: 4.9, image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg' },
+            { name: 'Ashwika Mittal', specialization: 'Dermatologist', rating: 4.5, image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg' },
+            { name: 'Avni Gupta', specialization: 'Orthopedic Surgeon', rating: 4.0, image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg' }
           ];
       %>
       
       <% displayDoctors.forEach(doctor => { %>
         <div class="doctor-card">
           <div class="doctor-img">
-            <% if (typeof doctor.userId !== 'undefined') { %>
-              <img src="<%= doctor.profileImage || '/assets/default-nurse.png' %>" alt="<%= doctor.userId.name %>">
-            <% } else { %>
-              <img src="<%= doctor.image %>" alt="<%= doctor.name %>">
-            <% } %>
+            <img src="<%= doctor.image %>" alt="<%= doctor.name %>">
           </div>
-          <h3>
-            <%= typeof doctor.userId !== 'undefined' ? doctor.userId.name : doctor.name %>
-          </h3>
-          <p class="designation">
-            <%= typeof doctor.specialization !== 'undefined' ? doctor.specialization : doctor.role %>
-          </p>
-          <div class="rating">
-            ⭐ <%= doctor.rating %> Rating
-          </div>
+          <h3><%= doctor.name %></h3>
+          <p class="designation"><%= doctor.specialization %></p>
+          <div class="rating">⭐ <%= typeof doctor.rating === 'number' ? doctor.rating.toFixed(1) : doctor.rating %> Rating</div>
           <% if (typeof doctor._id !== 'undefined') { %>
             <a href="/booking?nurseId=<%= doctor._id %>">
               <button class="book-btn">Book Appointment</button>

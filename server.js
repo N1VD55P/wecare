@@ -38,6 +38,7 @@ const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/wecare';
 
 // Load models
 const User = require('./models/User');
+const Nurse = require('./models/Nurse');
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -98,34 +99,131 @@ mongoose.connect(mongoUri, {
 });
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
   // Show login button if user is not logged in
   const showLogin = !res.locals.currentUser;
-  res.render('index', { 
-    page: 'home',
-    showLogin
-  });
+  
+  try {
+    // Fetch featured nurses from database (limit to 4)
+    const dbNurses = await Nurse.find({ isActive: true }).limit(4).lean();
+    
+    // If nurses exist in database, use them; otherwise use default data
+    const featuredNurses = dbNurses.length > 0 ? dbNurses.map(nurse => ({
+      id: nurse._id,
+      name: nurse.name,
+      specialization: nurse.specialization,
+      rating: nurse.rating,
+      image: nurse.profileImage
+    })) : [
+      {
+        id: 1,
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      },
+      {
+        id: 2,
+        name: 'Anjali Kumar',
+        specialization: 'Elderly Care Specialist',
+        rating: 4.9,
+        image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg'
+      },
+      {
+        id: 3,
+        name: 'Neha Patel',
+        specialization: 'Post-Surgery Care Specialist',
+        rating: 4.5,
+        image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg'
+      },
+      {
+        id: 4,
+        name: 'Meera Singh',
+        specialization: 'Child Care Nurse',
+        rating: 4.7,
+        image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg'
+      }
+    ];
+    
+    res.render('index', { 
+      page: 'home',
+      showLogin,
+      featuredNurses
+    });
+  } catch (err) {
+    console.error('Error fetching featured nurses:', err);
+    res.render('index', { 
+      page: 'home',
+      showLogin,
+      featuredNurses: []
+    });
+  }
 });
 
-app.get('/nurses', (req, res) => {
-  // In production, fetch from database
-  const nurses = [
-    {
-      id: 1,
-      name: 'Priya Sharma',
-      specialization: 'General Home Care Nurse',
-      rating: 4.8,
-      reviews: 145,
-      distance: '2.5 km away',
-      image: 'https://example.com/nurse1.jpg'
-    }
-    // Add more nurses...
-  ];
-  
-  res.render('nurses', { 
-    page: 'nurses',
-    nurses: nurses
-  });
+app.get('/nurses', async (req, res) => {
+  try {
+    // Fetch all active nurses from database
+    const dbNurses = await Nurse.find({ isActive: true }).lean();
+    
+    // If nurses exist in database, use them; otherwise use default data
+    const nurses = dbNurses.length > 0 ? dbNurses.map(nurse => ({
+      id: nurse._id,
+      name: nurse.name,
+      specialization: nurse.specialization,
+      rating: nurse.rating,
+      reviews: nurse.reviews,
+      distance: nurse.distance,
+      image: nurse.profileImage
+    })) : [
+      {
+        id: 1,
+        name: 'Priya Sharma',
+        specialization: 'General Home Care Nurse',
+        rating: 4.8,
+        reviews: 145,
+        distance: '2.5 km away',
+        image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      },
+      {
+        id: 2,
+        name: 'Anjali Kumar',
+        specialization: 'Elderly Care Specialist',
+        rating: 4.9,
+        reviews: 203,
+        distance: '1.2 km away',
+        image: 'https://i.pinimg.com/736x/a3/4f/96/a34f968ab546da32e3d2a7a542655e6a.jpg'
+      },
+      {
+        id: 3,
+        name: 'Neha Patel',
+        specialization: 'Post-Surgery Care Specialist',
+        rating: 4.5,
+        reviews: 98,
+        distance: '3.1 km away',
+        image: 'https://i.pinimg.com/736x/59/8c/80/598c809632f9de89259c069ef1d9bee8.jpg'
+      },
+      {
+        id: 4,
+        name: 'Meera Singh',
+        specialization: 'Child Care Nurse',
+        rating: 4.7,
+        reviews: 167,
+        distance: '2.8 km away',
+        image: 'https://i.pinimg.com/736x/ad/6c/b0/ad6cb07e44a5e63ffc89d7723b181052.jpg'
+      }
+    ];
+    
+    res.render('nurses', { 
+      page: 'nurses',
+      nurses: nurses
+    });
+  } catch (err) {
+    console.error('Error fetching nurses:', err);
+    res.render('nurses', { 
+      page: 'nurses',
+      nurses: []
+    });
+  }
 });
 
 app.get('/booking', (req, res) => {
@@ -182,12 +280,33 @@ app.post('/signup', async (req, res) => {
       return res.status(409).render('signup', { error: 'An account with that email already exists.', form: { name, email, role } });
     }
 
-  const newUser = await User.create({ name: name.trim(), email: email.toLowerCase().trim(), password, role: role || 'patient' });
-  console.log('New user created:', newUser.email, newUser.role);
-  // After signup, set session and redirect to patient portal (auto-login)
-  req.session.userId = newUser._id;
-  req.session.role = newUser.role;
-  return res.redirect('/patientportal');
+    const newUser = await User.create({ name: name.trim(), email: email.toLowerCase().trim(), password, role: role || 'patient' });
+    console.log('New user created:', newUser.email, newUser.role);
+    
+    // If new user is a nurse, automatically create a nurse profile in Nurses collection
+    if (newUser.role === 'nurse') {
+      try {
+        await Nurse.create({
+          userId: newUser._id,
+          name: newUser.name,
+          specialization: 'General Nursing',
+          rating: 4.5,
+          reviews: 0,
+          distance: '0 km away',
+          profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg',
+          isActive: true
+        });
+        console.log('Nurse profile created for:', newUser.email);
+      } catch (nurseErr) {
+        console.error('Error creating nurse profile:', nurseErr);
+      }
+    }
+    
+    // After signup, set session and redirect to patient/nurse portal (auto-login)
+    req.session.userId = newUser._id;
+    req.session.role = newUser.role;
+    if (newUser.role === 'nurse') return res.redirect('/nurseportal');
+    return res.redirect('/patientportal');
   } catch (err) {
     console.error('Signup error:', err);
     return res.status(500).render('signup', { error: 'Failed to create account. Please try again.', form: { name, email, role } });
@@ -242,7 +361,30 @@ app.get('/nurseportal', (req, res) => {
   if (!req.session || !req.session.userId) return res.redirect('/login');
   if (req.session.role !== 'nurse') return res.status(403).send('Forbidden');
   const nurse = res.locals.currentUser || {};
-  res.render('nurseportal', { nurse: nurse, appointmentCount: 3 });
+  
+  // Dynamic data based on nurse profile
+  const nurseStats = {
+    earnings: nurse.profile?.hourlyRate ? nurse.profile.hourlyRate : '0',
+    pendingRequests: nurse.history?.filter(h => h.category === 'pending')?.length || 0,
+    hoursWorked: nurse.profile?.experience || '0',
+    rating: '4.9'
+  };
+  
+  const nurseEarnings = {
+    week: nurse.profile?.hourlyRate ? (parseInt(nurse.profile.hourlyRate) * 8).toString() : '0',
+    month: nurse.profile?.hourlyRate ? (parseInt(nurse.profile.hourlyRate) * 40).toString() : '0',
+    pending: nurse.profile?.hourlyRate ? (parseInt(nurse.profile.hourlyRate) * 4).toString() : '0'
+  };
+  
+  // Calculate appointment count from history
+  const appointmentCount = nurse.history?.filter(h => h.category === 'appointment')?.length || 0;
+  
+  res.render('nurseportal', { 
+    nurse: nurse, 
+    appointmentCount: appointmentCount,
+    nurseStats: nurseStats,
+    nurseEarnings: nurseEarnings
+  });
 });
 
 // Profile routes (view and update)
@@ -330,6 +472,25 @@ app.post('/nurseprofile', upload.fields([{ name: 'photo', maxCount: 1 }, { name:
     }
 
     await User.findByIdAndUpdate(req.session.userId, update, { new: true, runValidators: true });
+    
+    // Also update Nurse collection with new details
+    try {
+      const nurseUpdate = {
+        name: req.body.name,
+        specialization: req.body.specialization || 'General Nursing',
+        profileImage: update.profile.photo || 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
+      };
+      
+      await Nurse.findOneAndUpdate(
+        { userId: req.session.userId },
+        nurseUpdate,
+        { new: true }
+      );
+      console.log('Nurse profile updated in Nurses collection');
+    } catch (nurseErr) {
+      console.error('Error updating nurse in Nurses collection:', nurseErr);
+    }
+    
     const user = await User.findById(req.session.userId).lean();
     return res.render('nurseprofile', { user, success: 'Profile updated successfully.' });
   } catch (err) {

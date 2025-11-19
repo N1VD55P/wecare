@@ -11,25 +11,28 @@
 <body>
   <main class="main-content">
     <header class="top-bar">
-      <div>
-        <h2>Welcome, <%= typeof nurse !== 'undefined' ? nurse.name : 'Meera' %>!</h2>
-        <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today | <a href="/" style="color: white; text-decoration: none;">Home</a> | <a href="/nurseprofile" style="color: white; text-decoration: none;">My Profile</a> | <a href="/logout" style="color: white; text-decoration: none;">Logout</a></p>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+          <h2>Welcome, <%= typeof nurse !== 'undefined' ? nurse.name : 'Meera' %>!</h2>
+          <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today | <a href="/" style="color: white; text-decoration: none;">Home</a> | <a href="/logout" style="color: white; text-decoration: none;">Logout</a></p>
+        </div>
+        <a href="/nurseprofile" style="background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; white-space: nowrap; margin-left: 20px;">Edit My Profile</a>
       </div>
     </header>
 
     <section class="stats">
       <% 
       const stats = typeof nurseStats !== 'undefined' ? nurseStats : {
-        earnings: '24500',
-        pendingRequests: '3',
-        hoursWorked: '6.5h',
+        earnings: '0',
+        pendingRequests: '0',
+        hoursWorked: '0',
         rating: '4.9'
       };
       %>
       
       <div class="stat-card">
-        <h3>Rs.<%= stats.earnings %></h3>
-        <p>Today's Earnings</p>
+        <h3>Rs.<%= stats.earnings %>/hr</h3>
+        <p>Hourly Rate</p>
       </div>
       <div class="stat-card">
         <h3><%= stats.pendingRequests %></h3>
@@ -37,7 +40,7 @@
       </div>
       <div class="stat-card">
         <h3><%= stats.hoursWorked %></h3>
-        <p>Hours Worked</p>
+        <p>Experience</p>
       </div>
       <div class="stat-card">
         <h3><%= stats.rating %></h3>
@@ -49,11 +52,24 @@
       <div class="appointments">
         <h3>Today's Appointments</h3>
         <% 
-        const todayAppointments = [
-          { patient: 'Manasvi Vats', service: 'Post-surgery care', time: '9:00 AM - 11:00 AM', color: 'blue', initials: 'MV' },
-          { patient: 'Akash Jain', service: 'Medication administration', time: '1:00 PM - 2:30 PM', color: 'green', initials: 'AJ' },
-          { patient: 'Isha Sharma', service: 'Physical therapy assistance', time: '4:00 PM - 6:00 PM', color: 'purple', initials: 'IS' }
-        ];
+        // Get appointments from nurse history
+        const todayAppointments = (nurse.history || [])
+          .filter(h => h.category === 'appointment')
+          .slice(0, 3)
+          .map((apt, idx) => ({
+            patient: apt.notes || 'Patient ' + (idx + 1),
+            service: apt.meta?.service || 'Nursing Care',
+            time: apt.meta?.time || '9:00 AM - 11:00 AM',
+            color: ['blue', 'green', 'purple'][idx % 3],
+            initials: (apt.notes || 'P').substring(0, 2).toUpperCase()
+          }));
+        
+        // If no appointments, show sample
+        if (todayAppointments.length === 0) {
+          todayAppointments.push(
+            { patient: 'No appointments scheduled', service: 'Check back later', time: '--', color: 'blue', initials: 'NA' }
+          );
+        }
         %>
         
         <% todayAppointments.forEach(appointment => { %>
@@ -73,10 +89,20 @@
         <div class="pending">
           <h3>Pending Requests</h3>
           <% 
-          const pendingRequests = [
-            { patient: 'Parth Bansal', service: 'Wound care', time: 'Tomorrow 10:00 AM' },
-            { patient: 'Ashwika', service: 'Elderly care', time: 'Friday 2:00 PM' }
-          ];
+          const pendingRequests = (nurse.history || [])
+            .filter(h => h.category === 'pending')
+            .slice(0, 2)
+            .map((req, idx) => ({
+              patient: req.notes || 'Patient ' + (idx + 1),
+              service: req.meta?.service || 'Care Service',
+              time: req.meta?.time || 'Tomorrow 10:00 AM'
+            }));
+          
+          if (pendingRequests.length === 0) {
+            pendingRequests.push(
+              { patient: 'No pending requests', service: 'All caught up!', time: '--' }
+            );
+          }
           %>
           
           <% pendingRequests.forEach(request => { %>
@@ -95,9 +121,9 @@
           <h3>Earnings Summary</h3>
           <% 
           const earnings = typeof nurseEarnings !== 'undefined' ? nurseEarnings : {
-            week: '1,240',
-            month: '4,890',
-            pending: '320'
+            week: '0',
+            month: '0',
+            pending: '0'
           };
           %>
           

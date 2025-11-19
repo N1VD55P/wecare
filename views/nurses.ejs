@@ -73,17 +73,33 @@
       <% if (typeof nurses !== 'undefined' && nurses.length > 0) { %>
         <% nurses.forEach(nurse => { %>
           <div class="nurse-card">
-            <img src="<%= nurse.image %>" alt="<%= nurse.name %>">
-            <h3><%= nurse.name %></h3>
-            <p class="specialization"><%= nurse.specialization %></p>
-            <div class="rating">
-              <i class="fas fa-star"></i>
-              <%= nurse.rating %> (<%= nurse.reviews %> reviews)
+            <div class="nurse-image">
+              <img src="<%= nurse.image %>" alt="<%= nurse.name %>">
+              <div class="rate-badge"><%= nurse.rating %>/5</div>
             </div>
-            <p class="distance"><i class="fas fa-map-marker-alt"></i> <%= nurse.distance %></p>
-            <a href="/booking?nurse=<%= nurse.id %>">
-              <button class="book-btn">Book Now</button>
-            </a>
+            <div class="nurse-info">
+              <h3><%= nurse.name %></h3>
+              <p class="specialization"><%= nurse.specialization %></p>
+              <div class="experience">
+                <i class="fas fa-briefcase"></i>
+                <span><%= nurse.experience %></span>
+              </div>
+              <div class="rating">
+                <i class="fas fa-star"></i>
+                <%= nurse.rating %> (<%= nurse.reviews %> reviews)
+              </div>
+              <p class="distance"><i class="fas fa-map-marker-alt"></i> <%= nurse.distance %></p>
+              <div class="certifications">
+                <i class="fas fa-certificate"></i>
+                <small><%= nurse.certifications %></small>
+              </div>
+              <div class="hourly-rate">
+                <strong>Rs. <%= nurse.hourlyRate %>/hour</strong>
+              </div>
+              <a href="/booking?nurse=<%= nurse.id %>">
+                <button class="book-btn">Book Now</button>
+              </a>
+            </div>
           </div>
         <% }); %>
       <% } else { %>
