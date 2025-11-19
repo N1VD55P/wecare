@@ -13,7 +13,23 @@
 </head>
 <body>
 
-  <%- include('partials/header', { page: 'home', showLogin: true }) %>
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+        <div class="logo">WeCare</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="nurses.html">Nurses</a></li>
+            <li><a href="news.html">News</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+            <li><a href="services.html">Service</a></li>
+        </ul>
+        <a href="login.html">
+            <button class="login_btn">Login</button>
+        </a>
+    </nav>
+</header>
 
   <!-- Hero Section -->
   <section class="hero">
@@ -23,7 +39,7 @@
       <p>Professional healthcare at home. Verified nurses available 24/7 for your care needs.</p>
       
       <div class="search-box">
-        <input type="text" placeholder="Enter your Area/Pin Code">
+        <input type="text" placeholder="Enter your Area/Pin Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         <select>
           <option>Morning (6AM - 12PM)</option>
           <option>Afternoon (12PM - 6PM)</option>
