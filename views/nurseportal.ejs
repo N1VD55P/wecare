@@ -13,7 +13,7 @@
     <header class="top-bar">
       <div>
         <h2>Welcome, <%= typeof nurse !== 'undefined' ? nurse.name : 'Meera' %>!</h2>
-        <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today</p>
+        <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today | <a href="/" style="color: white; text-decoration: none;">Home</a> | <a href="/logout" style="color: white; text-decoration: none;">Logout</a></p>
       </div>
     </header>
 
@@ -109,6 +109,8 @@
       </div>
     </section>
   </main>
+
+  <%- include('partials/footer') %>
 
   <script src="/js/nurseportal.js"></script>
 </body>

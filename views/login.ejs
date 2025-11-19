@@ -10,8 +10,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <%- include('partials/header', { page: 'login', showLogin: false }) %>
+
   <div class="container">
     <div class="login-box">
+        <% if (typeof error !== 'undefined' && error) { %>
+          <div class="error-message"><%= error %></div>
+        <% } %>
+        <% if (typeof success !== 'undefined' && success) { %>
+          <div class="success-message"><%= success %></div>
+        <% } %>
       <div class="top-bar">
         <div class="logo-area">
           <img src="/logo.png" alt="WeCare Logo" class="logo-img" />
@@ -26,14 +34,15 @@
       <p>Sign in to continue</p>
 
       <div class="role-buttons">
-        <a href="/patientportal"><button>Patient</button></a>
-        <a href="/nurseportal"><button>Nurse</button></a>
+        <button type="button" data-role="patient" class="role-btn">Patient</button>
+        <button type="button" data-role="nurse" class="role-btn">Nurse</button>
       </div>
 
       <form action="/login" method="POST">
+        <input type="hidden" id="roleInput" name="role" value="<%= (typeof role !== 'undefined' && role) ? role : 'patient' %>">
         <div class="input-group">
           <label for="email">Email / Mobile Number</label>
-          <input type="text" id="email" name="email" placeholder="Enter your email or mobile number" required />
+          <input type="text" id="email" name="email" placeholder="Enter your email or mobile number" value="<%= (typeof email !== 'undefined' && email) ? email : '' %>" required />
         </div>
 
         <div class="input-group">
@@ -52,5 +61,8 @@
       </div>
     </div>
   </div>
+
+  <%- include('partials/footer') %>
+  <script src="/js/login.js"></script>
 </body>
 </html>

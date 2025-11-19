@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "wecare",
   "version": "1.0.0",
   "description": "WeCare Healthcare Application",
@@ -13,16 +13,21 @@
     "patients",
     "booking"
   ],
-  "author": "",
+  "author": " goroup no 14",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "connect-mongo": "^4.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-session": "^1.17.3",
+    "mongoose": "^7.5.0",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.11"
   }
 }

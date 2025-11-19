@@ -3,6 +3,36 @@
     title: 'WeCare - Trusted Nurses Anytime',
     stylesheet: 'home_style.css'
 }) %>
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeCare - Trusted Nurses Anytime</title>
+  <link rel="stylesheet" href="/css/home_style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <nav class="navbar">
+        <div class="logo"><a href="/" style="color: white; text-decoration: none;">🏥 WeCare</a></div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/nurses">Find Nurses</a></li>
+            <li><a href="/services">Services</a></li>
+            <li><a href="/news">News</a></li>
+        </ul>
+        <a href="/login">
+            <button class="login_btn">Login</button>
+        </a>
+    </nav>
+</header>
 
   <!-- Hero Section -->
   <section class="hero">
@@ -22,6 +52,14 @@
           </select>
           <button type="submit">Search</button>
         </form>
+        <input type="text" placeholder="Enter your Area/Pin Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        <select>
+          <option>Morning (6AM - 12PM)</option>
+          <option>Afternoon (12PM - 6PM)</option>
+          <option>Evening (6PM - 12AM)</option>
+          <option>Night (12AM - 6AM)</option>
+        </select>
+        <button>Search</button>
       </div>
     </div>
   </section>
