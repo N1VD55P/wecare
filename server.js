@@ -10,6 +10,28 @@ const PORT = process.env.PORT || 3000;
 // Sessions
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const multer = require('multer');
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+
+// Ensure uploads directory exists
+try {
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+} catch (err) {
+  console.error('Failed to create uploads directory:', err);
+}
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const safeName = Date.now() + '-' + file.originalname.replace(/[^a-zA-Z0-9.\-\_]/g, '_');
+    cb(null, safeName);
+  }
+});
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
 
 // Mongo URI for session store (ensure defined before session middleware)
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/wecare';
@@ -32,7 +54,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI || mongoUri }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 } // 7 days
+  cookie: { maxAge: 1000 * 60 * 60 } // 1 hour
 }));
 
 // Make current user available in templates
@@ -229,7 +251,7 @@ app.get('/profile', (req, res) => {
   return res.render('profile', { user });
 });
 
-app.post('/profile', async (req, res) => {
+app.post('/profile', upload.single('photo'), async (req, res) => {
   if (!req.session || !req.session.userId) return res.redirect('/login');
   if (req.session.role !== 'patient') return res.status(403).send('Forbidden');
   try {
@@ -248,6 +270,11 @@ app.post('/profile', async (req, res) => {
         bloodGroup: req.body.bloodGroup || ''
       }
     };
+
+    if (req.file && req.file.filename) {
+      update.profile.photo = '/uploads/' + req.file.filename;
+    }
+
     await User.findByIdAndUpdate(req.session.userId, update, { new: true, runValidators: true });
     const user = await User.findById(req.session.userId).lean();
     return res.render('profile', { user, success: 'Profile updated.' });

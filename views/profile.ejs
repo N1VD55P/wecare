@@ -19,7 +19,17 @@
         <div class="success-message"><%= success %></div>
       <% } %>
 
-      <form action="/profile" method="POST">
+      <form action="/profile" method="POST" enctype="multipart/form-data">
+        <div class="input-group">
+          <label for="photo">Profile Photo</label>
+          <% if (user.profile && user.profile.photo) { %>
+            <div style="margin-bottom:8px;">
+              <img src="<%= user.profile.photo %>" alt="Profile photo" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />
+            </div>
+          <% } %>
+          <input type="file" id="photo" name="photo" accept="image/*" />
+          <small>Optional. Upload a square image for best results.</small>
+        </div>
         <div class="input-group">
           <label for="name">Full name</label>
           <input type="text" id="name" name="name" value="<%= user.name %>" required />
