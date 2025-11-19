@@ -287,6 +287,57 @@ app.post('/profile', upload.single('photo'), async (req, res) => {
   }
 });
 
+// Nurse Profile routes
+app.get('/nurseprofile', (req, res) => {
+  if (!req.session || !req.session.userId) return res.redirect('/login');
+  if (req.session.role !== 'nurse') return res.status(403).send('Forbidden');
+  const user = res.locals.currentUser || {};
+  return res.render('nurseprofile', { user });
+});
+
+app.post('/nurseprofile', upload.fields([{ name: 'photo', maxCount: 1 }, { name: 'licenseDocument', maxCount: 1 }, { name: 'certificateDocument', maxCount: 1 }]), async (req, res) => {
+  if (!req.session || !req.session.userId) return res.redirect('/login');
+  if (req.session.role !== 'nurse') return res.status(403).send('Forbidden');
+  try {
+    const update = {
+      name: req.body.name,
+      profile: {
+        phone: req.body.phone || '',
+        dob: req.body.dob || undefined,
+        gender: req.body.gender || '',
+        address: req.body.address || '',
+        city: req.body.city || '',
+        state: req.body.state || '',
+        zip: req.body.zip || '',
+        emergencyContact: req.body.emergencyContact || '',
+        notes: req.body.notes || '',
+        licenseNumber: req.body.licenseNumber || '',
+        specialization: req.body.specialization || '',
+        experience: req.body.experience || '',
+        certifications: req.body.certifications || '',
+        hourlyRate: req.body.hourlyRate || ''
+      }
+    };
+
+    if (req.files && req.files.photo && req.files.photo[0]) {
+      update.profile.photo = '/uploads/' + req.files.photo[0].filename;
+    }
+    if (req.files && req.files.licenseDocument && req.files.licenseDocument[0]) {
+      update.profile.licenseDocument = '/uploads/' + req.files.licenseDocument[0].filename;
+    }
+    if (req.files && req.files.certificateDocument && req.files.certificateDocument[0]) {
+      update.profile.certificateDocument = '/uploads/' + req.files.certificateDocument[0].filename;
+    }
+
+    await User.findByIdAndUpdate(req.session.userId, update, { new: true, runValidators: true });
+    const user = await User.findById(req.session.userId).lean();
+    return res.render('nurseprofile', { user, success: 'Profile updated successfully.' });
+  } catch (err) {
+    console.error('Nurse profile update error:', err);
+    return res.status(500).render('nurseprofile', { user: res.locals.currentUser || {}, error: 'Failed to update profile.' });
+  }
+});
+
 app.get('/news', (req, res) => {
   res.render('news', {
     page: 'news'

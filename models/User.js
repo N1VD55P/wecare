@@ -19,7 +19,15 @@ const UserSchema = new mongoose.Schema({
     zip: { type: String, default: '' },
     emergencyContact: { type: String, default: '' },
     notes: { type: String, default: '' },
-    bloodGroup: { type: String, default: '' }
+    bloodGroup: { type: String, default: '' },
+    // Nurse-specific fields
+    licenseNumber: { type: String, default: '' },
+    specialization: { type: String, default: '' },
+    experience: { type: String, default: '' },
+    certifications: { type: String, default: '' },
+    licenseDocument: { type: String, default: '' },
+    certificateDocument: { type: String, default: '' },
+    hourlyRate: { type: String, default: '' }
   }
   ,
   // Medical / appointment history: array of small entries
