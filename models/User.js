@@ -11,6 +11,8 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, default: '' },
     dob: { type: Date },
     gender: { type: String, enum: ['male', 'female', 'other', ''], default: '' },
+    // relative URL to uploaded profile photo (e.g. '/uploads/12345-avatar.png')
+    photo: { type: String, default: '' },
     address: { type: String, default: '' },
     city: { type: String, default: '' },
     state: { type: String, default: '' },
