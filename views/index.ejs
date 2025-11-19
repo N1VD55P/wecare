@@ -114,14 +114,24 @@
       <% displayDoctors.forEach(doctor => { %>
         <div class="doctor-card">
           <div class="doctor-img">
-            <% if (typeof doctor.userId !== 'undefined') { %>
-              <img src="<%= doctor.profileImage || 'https://via.placeholder.com/150?text=No+Photo' %>" alt="<%= doctor.userId.name %>">
-            <% } else { %>
-              <img src="<%= doctor.image || 'https://via.placeholder.com/150?text=No+Photo' %>" alt="<%= doctor.name %>">
-            <% } %>
+            <% 
+              let imageUrl = 'https://via.placeholder.com/150?text=No+Photo';
+              
+              // Check if it's from database (has userId field) or default data
+              if (typeof doctor.userId !== 'undefined') {
+                // From database - use profileImage with fallback
+                imageUrl = doctor.profileImage && doctor.profileImage.trim() !== '' 
+                  ? doctor.profileImage 
+                  : 'https://via.placeholder.com/150?text=No+Photo';
+              } else if (doctor.image) {
+                // Default data - use image field
+                imageUrl = doctor.image;
+              }
+            %>
+            <img src="<%= imageUrl %>" alt="<%= typeof doctor.userId !== 'undefined' ? (doctor.name || 'Nurse') : doctor.name %>">
           </div>
           <h3>
-            <%= typeof doctor.userId !== 'undefined' ? doctor.userId.name : doctor.name %>
+            <%= typeof doctor.userId !== 'undefined' ? doctor.name : doctor.name %>
           </h3>
           <p class="designation">
             <%= typeof doctor.specialization !== 'undefined' ? doctor.specialization : doctor.role %>
@@ -130,7 +140,7 @@
             ⭐ <%= doctor.rating %> Rating
           </div>
           <% if (typeof doctor._id !== 'undefined') { %>
-            <a href="/booking?nurseId=<%= doctor._id %>">
+            <a href="/booking?nurse=<%= doctor._id %>">
               <button class="book-btn">Book Appointment</button>
             </a>
           <% } else { %>
