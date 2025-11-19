@@ -1,3 +1,4 @@
+
 <%- include('partials/header', { 
     page: 'home', 
     title: 'WeCare - Trusted Nurses Anytime',
@@ -18,48 +19,23 @@
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header>
-    <nav class="navbar">
-        <div class="logo"><a href="/" style="color: white; text-decoration: none;">🏥 WeCare</a></div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/nurses">Find Nurses</a></li>
-            <li><a href="/services">Services</a></li>
-            <li><a href="/news">News</a></li>
-        </ul>
-        <a href="/login">
-            <button class="login_btn">Login</button>
-        </a>
-    </nav>
-</header>
-
   <!-- Hero Section -->
   <section class="hero">
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>Find Trusted Nurses <span class="highlight">Near You</span></h1>
       <p>Professional healthcare at home. Verified nurses available 24/7 for your care needs.</p>
-      
-      <div class="search-box">
-        <form action="/nurses" method="GET">
-          <input type="text" name="location" placeholder="Enter your Area/Pin Code" required>
-          <select name="timeSlot">
+      <div class="search-box aesthetic-search">
+        <form action="/nurses" method="GET" class="search-form">
+          <input type="text" name="location" class="search-input" placeholder="Enter your Area/Pin Code" maxlength="6" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+          <select name="timeSlot" class="search-select">
             <option value="morning">Morning (6AM - 12PM)</option>
             <option value="afternoon">Afternoon (12PM - 6PM)</option>
             <option value="evening">Evening (6PM - 12AM)</option>
             <option value="night">Night (12AM - 6AM)</option>
           </select>
-          <button type="submit">Search</button>
+          <button type="submit" class="search-btn"><i class="fa fa-search"></i> Search</button>
         </form>
-        <input type="text" placeholder="Enter your Area/Pin Code" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-        <select>
-          <option>Morning (6AM - 12PM)</option>
-          <option>Afternoon (12PM - 6PM)</option>
-          <option>Evening (6PM - 12AM)</option>
-          <option>Night (12AM - 6AM)</option>
-        </select>
-        <button>Search</button>
       </div>
     </div>
   </section>

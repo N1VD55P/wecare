@@ -99,8 +99,11 @@ mongoose.connect(mongoUri, {
 
 // Routes
 app.get('/', (req, res) => {
+  // Show login button if user is not logged in
+  const showLogin = !res.locals.currentUser;
   res.render('index', { 
-    page: 'home'
+    page: 'home',
+    showLogin
   });
 });
 
