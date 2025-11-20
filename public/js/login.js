@@ -43,6 +43,26 @@
       });
     }
 
+    // Password show/hide toggle
+    var passwordIcon = document.querySelector('.password-icon');
+    var passwordInput = document.getElementById('password');
+    if (passwordIcon && passwordInput) {
+      passwordIcon.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isPasswordVisible = passwordInput.type === 'text';
+        
+        // Toggle input type
+        passwordInput.type = isPasswordVisible ? 'password' : 'text';
+        
+        // Update icon
+        var icon = passwordIcon.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-eye');
+          icon.classList.toggle('fa-eye-slash');
+        }
+      });
+    }
+
     // Allow pressing Escape to close as well
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' || e.key === 'Esc') {

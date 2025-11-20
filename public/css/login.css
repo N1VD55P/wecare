@@ -150,6 +150,13 @@ body {
   transform: translateY(-50%);
   color: #777;
   cursor: pointer;
+  font-size: 1.1em;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.password-icon:hover {
+  color: #1a3d7c;
 }
 
 /* Sign in button */
