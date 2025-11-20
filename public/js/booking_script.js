@@ -4,24 +4,26 @@ let selectedDate = null;
 let selectedTime = null;
 
 function loadSelectedNurse() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const nurseName = urlParams.get('nurse');
+  // 🎯 First, check if window.nurseData was set by EJS template
+  if (typeof window.nurseData !== 'undefined' && window.nurseData) {
+    selectedNurse = window.nurseData;
+    console.log('✅ Nurse data loaded from EJS template:', selectedNurse);
+    return;
+  }
   
-  if (nurseName) {
-    fetch('data/cards.json')
-      .then(response => response.json())
-      .then(data => {
-        selectedNurse = data.nurses.find(n => n.name === nurseName);
-        if (selectedNurse) {
-          updateNurseInfo();
-        }
-      })
-      .catch(error => console.error('Error loading nurse data:', error));
+  // Fallback: try URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const nurseId = urlParams.get('nurse');
+  
+  if (nurseId) {
+    console.log('Attempting to fetch nurse data for ID:', nurseId);
+    // Could fetch from API here if needed
   } else {
+    // Fallback: try sessionStorage
     const storedNurse = sessionStorage.getItem('selectedNurse');
     if (storedNurse) {
       selectedNurse = JSON.parse(storedNurse);
-      updateNurseInfo();
+      console.log('✅ Nurse data loaded from sessionStorage:', selectedNurse);
     }
   }
 }
@@ -142,8 +144,20 @@ function updateProceedButton() {
 function setupProceedButton() {
   const proceedBtn = document.querySelector('.proceed-btn');
   
-  proceedBtn.addEventListener('click', function() {
+  proceedBtn.addEventListener('click', async function() {
+    // 🎯 Debug: Check what selectedNurse contains
+    console.log('Proceed clicked!');
+    console.log('selectedNurse:', selectedNurse);
+    console.log('window.nurseData:', window.nurseData);
+    
+    // If selectedNurse is empty but window.nurseData is set, use it
+    if (!selectedNurse && typeof window.nurseData !== 'undefined') {
+      selectedNurse = window.nurseData;
+      console.log('✅ Using window.nurseData as selectedNurse');
+    }
+    
     if (!selectedNurse) {
+      console.error('❌ selectedNurse is null:', selectedNurse);
       alert('Please select a nurse');
       return;
     }
@@ -176,22 +190,55 @@ function setupProceedButton() {
       alert('Please select a payment method');
       return;
     }
-    
-    const appointment = {
-      nurse: selectedNurse,
-      service: selectedService,
-      date: selectedDate,
-      time: selectedTime,
-      payment: selectedPayment,
-      insurance: document.getElementById('insurance').checked,
-      bookingDate: new Date().toISOString()
-    };
-    
-    let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-    appointments.push(appointment);
-    localStorage.setItem('appointments', JSON.stringify(appointments));
-    
-    window.location.href = 'index.html';
+
+    // 🎯 Send booking request to server
+    try {
+      const response = await fetch('/book-appointment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nurseId: selectedNurse._id || selectedNurse.id || 'default',
+          nurseName: selectedNurse.name,
+          nurseImage: selectedNurse.profileImage || selectedNurse.image,
+          specialization: selectedNurse.specialization,
+          serviceType: selectedService.name,
+          servicePrice: selectedService.price,
+          appointmentDate: selectedDate,
+          appointmentTime: selectedTime,
+          paymentMethod: selectedPayment,
+          insuranceCoverage: document.getElementById('insurance').checked
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        alert('✅ Appointment booked successfully!');
+        console.log('Appointment created:', result.appointment);
+        
+        // Reload appointments
+        loadUserAppointments();
+        
+        // Reset form
+        document.querySelector('.date-input').value = '';
+        document.querySelector('.time-input').value = '';
+        selectedDate = null;
+        selectedTime = null;
+        selectedService = null;
+        
+        // Clear service selection styling
+        document.querySelectorAll('.service-card').forEach(c => c.style.border = '2px solid #e9ecef');
+        
+        updateBookingSummary();
+      } else {
+        alert('❌ Error: ' + (result.error || 'Failed to book appointment'));
+      }
+    } catch (err) {
+      console.error('Error booking appointment:', err);
+      alert('❌ Error booking appointment: ' + err.message);
+    }
   });
 }
 
@@ -213,50 +260,81 @@ function setupPaymentSelection() {
 
 function loadUserAppointments() {
   const appointmentsContainer = document.querySelector('.appointments-section');
-  const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-  
-  if (appointments.length === 0) {
-    appointmentsContainer.innerHTML = '<h2>Your Appointments</h2><p style="color: #666;">No appointments yet</p>';
-    return;
-  }
-  
-  let appointmentsHTML = '<h2>Your Appointments</h2>';
-  
-  const recentAppointments = appointments.slice(-3).reverse();
-  
-  recentAppointments.forEach((apt, index) => {
-    const appointmentDate = new Date(apt.date + 'T' + apt.time);
-    const isPast = appointmentDate < new Date();
-    
-    appointmentsHTML += `
-      <div class="appointment-card">
-        <div class="appointment-avatar">
-          <img src="${apt.nurse.image}" alt="${apt.nurse.name}" class="avatar-img">
-        </div>
-        <div class="appointment-info">
-          <div class="appointment-name">${apt.nurse.name}</div>
-          <div class="appointment-time">${new Date(apt.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}, ${apt.time}</div>
-        </div>
-        <div class="appointment-actions">
-          ${isPast ? 
-            '<button class="completed-btn">Completed</button>' : 
-            '<button class="cancel-btn" onclick="cancelAppointment(' + (appointments.length - 1 - index) + ')">Cancel</button><button class="reschedule-btn">Reschedule</button>'
-          }
-        </div>
-      </div>
-    `;
-  });
-  
-  appointmentsContainer.innerHTML = appointmentsHTML;
+  if (!appointmentsContainer) return;
+
+  // 🎯 Fetch from API instead of localStorage
+  fetch('/api/appointments')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok || data.appointments.length === 0) {
+        appointmentsContainer.innerHTML = '<h2>Your Appointments</h2><p style="color: #666;">No appointments yet</p>';
+        return;
+      }
+
+      let appointmentsHTML = '<h2>Your Appointments</h2>';
+      
+      const recentAppointments = data.appointments.slice(0, 5);
+      
+      recentAppointments.forEach((apt, index) => {
+        const appointmentDate = new Date(apt.appointmentDate);
+        const isPast = appointmentDate < new Date();
+        
+        appointmentsHTML += `
+          <div class="appointment-card">
+            <div class="appointment-avatar">
+              <img src="${apt.nurseImage || 'https://via.placeholder.com/50'}" alt="${apt.nurseName}" class="avatar-img">
+            </div>
+            <div class="appointment-info">
+              <div class="appointment-name">${apt.nurseName}</div>
+              <div class="appointment-specialty">${apt.specialization || ''}</div>
+              <div class="appointment-time">${new Date(apt.appointmentDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}, ${apt.appointmentTime}</div>
+              <div class="appointment-service">${apt.serviceType} - Rs ${apt.servicePrice}</div>
+              <div class="appointment-status" style="color: ${apt.status === 'cancelled' ? '#dc3545' : '#28a745'}; font-weight: bold;">${apt.status.toUpperCase()}</div>
+            </div>
+            <div class="appointment-actions">
+              ${isPast ? 
+                '<button class="completed-btn">Completed</button>' : 
+                (apt.status === 'cancelled' ? 
+                  '<span style="color: #dc3545;">Cancelled</span>' :
+                  `<button class="cancel-btn" onclick="cancelAppointment('${apt._id}')">Cancel</button>` +
+                  '<button class="reschedule-btn">Reschedule</button>'
+                )
+              }
+            </div>
+          </div>
+        `;
+      });
+      
+      appointmentsContainer.innerHTML = appointmentsHTML;
+    })
+    .catch(err => {
+      console.error('Error loading appointments:', err);
+      appointmentsContainer.innerHTML = '<h2>Your Appointments</h2><p style="color: #666;">Error loading appointments</p>';
+    });
 }
 
-function cancelAppointment(index) {
+function cancelAppointment(appointmentId) {
   if (confirm('Are you sure you want to cancel this appointment?')) {
-    let appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-    appointments.splice(index, 1);
-    localStorage.setItem('appointments', JSON.stringify(appointments));
-    loadUserAppointments();
-    alert('Appointment cancelled successfully');
+    // 🎯 Send cancel request to server
+    fetch(`/cancel-appointment/${appointmentId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        alert('✅ Appointment cancelled successfully');
+        loadUserAppointments();
+      } else {
+        alert('❌ Error: ' + (data.error || 'Failed to cancel appointment'));
+      }
+    })
+    .catch(err => {
+      console.error('Error cancelling appointment:', err);
+      alert('❌ Error cancelling appointment: ' + err.message);
+    });
   }
 }
 

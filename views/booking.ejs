@@ -147,15 +147,19 @@
     <!-- Pass nurse data to JavaScript -->
     <% if (typeof nurse !== 'undefined' && nurse) { %>
         <script>
+            // 🎯 Set nurse data BEFORE loading booking_script.js
             window.nurseData = {
+                _id: "<%= nurse._id %>",
                 id: "<%= nurse._id %>",
                 name: "<%= nurse.name %>",
                 specialization: "<%= nurse.specialization %>",
-                rating: "<%= nurse.rating || 0 %>",
+                rating: "<%= nurse.rating || 4.5 %>",
                 profileImage: "<%= nurse.profileImage %>",
-                hourlyRate: "<%= nurse.hourlyRate %>"
+                image: "<%= nurse.profileImage %>",
+                hourlyRate: "<%= nurse.hourlyRate || '500' %>",
+                reviews: "<%= nurse.reviews || 0 %>"
             };
-            window.selectedNurse = window.nurseData;
+            console.log('✅ Window nurse data set:', window.nurseData);
         </script>
     <% } %>
     <script src="/js/booking_script.js"></script>
