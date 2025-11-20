@@ -1018,6 +1018,43 @@ app.get('/patient/edit-profile', async (req, res) => {
   }
 });
 
+// GET patient prescriptions page with rating section
+app.get('/patient/prescriptions', async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.userId) {
+      return res.redirect('/login');
+    }
+
+    // Get current user
+    const user = await User.findById(req.session.userId).lean();
+    if (!user || user.role !== 'patient') {
+      return res.status(403).send('Only patients can access this page');
+    }
+
+    // Get patient's completed appointments
+    let appointments = [];
+    try {
+      appointments = await Appointment.find({ 
+        userId: req.session.userId,
+        status: 'completed'
+      }).lean();
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      appointments = [];
+    }
+
+    // Render prescriptions page with appointments data
+    res.render('prescriptions', { 
+      patient: user,
+      appointments: appointments || []
+    });
+  } catch (err) {
+    console.error('Error loading patient prescriptions:', err);
+    res.status(500).send('Error loading prescriptions');
+  }
+});
+
 // POST update patient profile
 app.post('/patient/update-profile', upload.single('photo'), async (req, res) => {
   try {

@@ -13,6 +13,9 @@
   cursor: pointer;
   font-size: 1rem;
   box-shadow: 0 2px 8px rgba(34,197,94,0.13);
+  white-space: nowrap;
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 .reschedule-btn:hover { background-color:#1fa851; }
 
@@ -29,6 +32,9 @@
   transition: background 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(74,144,226,0.13);
   font-size: 1rem;
+  white-space: nowrap;
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 .request-call-btn:hover:not(:disabled) { background-color: #155bb5; box-shadow: 0 4px 16px rgba(74,144,226,0.18); }
 .request-call-btn:hover:not(:disabled) { background-color: #1a3d7c; box-shadow: 0 4px 16px rgba(74,144,226,0.18); }
@@ -135,7 +141,16 @@ body { font-family: 'Segoe UI', sans-serif; background-color: #eaf3ff; color: #1
 
 /* ========== APPOINTMENTS ========== */
 .appointments-list { display:flex; flex-direction:column; gap:20px; }
-.appointment-card { background:white; display:flex; align-items:center; padding:20px; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,0.05); }
+.appointment-card { 
+  background:white; 
+  display:flex; 
+  align-items:center; 
+  justify-content: space-between;
+  padding:20px; 
+  border-radius:12px; 
+  box-shadow:0 3px 8px rgba(0,0,0,0.05); 
+  gap: 20px;
+}
 .appointment-icon img { width:60px; height:60px; border-radius:50%; object-fit:cover; }
 .appointment-details { flex:1; margin-left:16px; }
 
@@ -272,6 +287,9 @@ body { font-family: 'Segoe UI', sans-serif; background-color: #eaf3ff; color: #1
   font-size: 1rem;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.13);
   transition: background 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  min-width: fit-content;
+  flex-shrink: 0;
 }
 
 .rate-nurse-btn:hover {
