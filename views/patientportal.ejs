@@ -39,14 +39,20 @@
               type: 'Home Visit - General Checkup',
               time: 'Today, 2:00 PM',
               image: 'https://img.freepik.com/premium-psd/png-smiling-indian-woman-nurse-pose-against-transparent-background-ideal-healthcare-medical-related-content_1031432-57667.jpg?w=360',
-              canJoin: true
+              canJoin: true,
+              status: 'pending',
+              id: '1'
             },
             {
               nurse: 'Nurse Akansha Sharma',
               type: 'Medication Review',
               time: 'Tomorrow, 10:00 AM',
               image: 'https://img.freepik.com/premium-psd/png-smiling-indian-woman-nurse-pose-against-transparent-background-ideal-healthcare-medical-related-content_1031432-58079.jpg?w=360',
-              canJoin: false
+              canJoin: false,
+              status: 'completed',
+              id: '2',
+              rating: 4.5,
+              feedback: 'Great service!'
             }
           ];
           
@@ -54,16 +60,23 @@
           %>
           
           <% appointmentList.forEach(appointment => { %>
-            <div class="appointment-card">
+            <div class="appointment-card" data-appointment-id="<%= appointment._id || appointment.id %>">
               <div class="appointment-icon">
-                <img src="<%= appointment.image %>" alt="<%= appointment.nurse %>" />
+                <img src="<%= appointment.image %>" alt="<%= appointment.nurse || appointment.nurseName %>" />
               </div>
               <div class="appointment-details">
-                <div class="appointment-name"><%= appointment.nurse %></div>
-                <div class="appointment-type"><%= appointment.type %></div>
+                <div class="appointment-name"><%= appointment.nurse || appointment.nurseName %></div>
+                <div class="appointment-type"><%= appointment.type || appointment.serviceType %></div>
                 <div class="appointment-time"><%= appointment.time %></div>
+                <% if (appointment.status === 'completed' && appointment.rating) { %>
+                  <div class="appointment-rating-display">
+                    You rated: <%= appointment.rating %>⭐ <%= appointment.feedback ? '- ' + appointment.feedback : '' %>
+                  </div>
+                <% } %>
               </div>
-              <% if (appointment.canJoin) { %>
+              <% if (appointment.status === 'completed' && !appointment.rating) { %>
+                <button class="rate-nurse-btn" onclick="openRatingModal('<%= appointment._id || appointment.id %>', '<%= appointment.nurse || appointment.nurseName %>')">Rate Nurse</button>
+              <% } else if (appointment.canJoin || appointment.status === 'confirmed' || appointment.status === 'pending') { %>
                 <button class="join-call-btn request-call-btn">Request Call</button>
               <% } else { %>
                 <button class="reschedule-btn">Reschedule</button>
@@ -197,13 +210,48 @@
           <button id="close-popup" class="close-btn">Close</button>
         </div>
       </div>
+
+      <!-- Rating Modal -->
+      <div id="rating-modal" class="rating-modal-overlay" style="display: none;">
+        <div class="rating-modal-content">
+          <div class="rating-modal-header">
+            <h2>Rate <span id="nurse-name-display"></span></h2>
+            <button class="rating-modal-close" onclick="closeRatingModal()">&times;</button>
+          </div>
+          <form id="rating-form" onsubmit="submitRating(event)">
+            <input type="hidden" id="appointment-id-input" />
+            
+            <div class="rating-input-group">
+              <label>Your Rating:</label>
+              <div class="star-rating" id="star-rating">
+                <span class="star" data-rating="1">⭐</span>
+                <span class="star" data-rating="2">⭐</span>
+                <span class="star" data-rating="3">⭐</span>
+                <span class="star" data-rating="4">⭐</span>
+                <span class="star" data-rating="5">⭐</span>
+              </div>
+              <input type="hidden" id="rating-input" name="rating" required />
+              <span id="rating-value-display"></span>
+            </div>
+
+            <div class="feedback-input-group">
+              <label for="feedback">Feedback (Optional):</label>
+              <textarea id="feedback" name="feedback" placeholder="Share your experience with this nurse..." rows="4"></textarea>
+            </div>
+
+            <div class="rating-modal-actions">
+              <button type="button" class="rating-cancel-btn" onclick="closeRatingModal()">Cancel</button>
+              <button type="submit" class="rating-submit-btn">Submit Rating</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </main>
 
   <%- include('partials/footer') %>
 
   <script src="/js/patient.js"></script>
-</script>
 <script>
 // Ensure Request Call button works for EJS-rendered and dynamic appointments
 function setupRequestCallButtons() {
@@ -220,6 +268,128 @@ function setupRequestCallButtons() {
 }
 document.addEventListener('DOMContentLoaded', setupRequestCallButtons);
 // If you render appointments dynamically, call setupRequestCallButtons() after rendering.
+
+// Rating System Functions
+let selectedRating = 0;
+
+function openRatingModal(appointmentId, nurseName) {
+  document.getElementById('appointment-id-input').value = appointmentId;
+  document.getElementById('nurse-name-display').textContent = nurseName;
+  document.getElementById('rating-modal').style.display = 'flex';
+  selectedRating = 0;
+  updateStarDisplay();
+  document.getElementById('feedback').value = '';
+}
+
+function closeRatingModal() {
+  document.getElementById('rating-modal').style.display = 'none';
+  selectedRating = 0;
+  document.getElementById('rating-input').value = '';
+  updateStarDisplay();
+}
+
+function setupStarRating() {
+  const stars = document.querySelectorAll('.star');
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      selectedRating = parseInt(this.getAttribute('data-rating'));
+      document.getElementById('rating-input').value = selectedRating;
+      updateStarDisplay();
+    });
+
+    star.addEventListener('mouseover', function() {
+      const hoverRating = parseInt(this.getAttribute('data-rating'));
+      stars.forEach((s, index) => {
+        if (index < hoverRating) {
+          s.style.opacity = '1';
+          s.style.color = '#FFD700';
+        } else {
+          s.style.opacity = '0.3';
+        }
+      });
+    });
+  });
+
+  document.getElementById('star-rating').addEventListener('mouseout', updateStarDisplay);
+}
+
+function updateStarDisplay() {
+  const stars = document.querySelectorAll('.star');
+  const display = document.getElementById('rating-value-display');
+  
+  stars.forEach((star, index) => {
+    if (index < selectedRating) {
+      star.style.opacity = '1';
+      star.style.color = '#FFD700';
+    } else {
+      star.style.opacity = '0.3';
+      star.style.color = '#333';
+    }
+  });
+
+  if (selectedRating > 0) {
+    display.textContent = selectedRating + ' out of 5 stars';
+    display.style.color = '#FFD700';
+    display.style.marginTop = '10px';
+  } else {
+    display.textContent = '';
+  }
+}
+
+function submitRating(event) {
+  event.preventDefault();
+
+  const appointmentId = document.getElementById('appointment-id-input').value;
+  const rating = document.getElementById('rating-input').value;
+  const feedback = document.getElementById('feedback').value;
+
+  if (!rating) {
+    alert('Please select a rating before submitting');
+    return;
+  }
+
+  // Send rating to server
+  fetch(`/patient/rate-nurse/${appointmentId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      rating: parseInt(rating),
+      feedback: feedback
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.ok) {
+      alert('Thank you for rating! Your feedback helps other patients.');
+      closeRatingModal();
+      // Refresh page to show updated rating
+      setTimeout(() => {
+        location.reload();
+      }, 500);
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Failed to submit rating. Please try again.');
+  });
+}
+
+// Initialize star rating when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  setupStarRating();
+  setupRequestCallButtons();
+
+  // Close modal when clicking outside of it
+  document.getElementById('rating-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeRatingModal();
+    }
+  });
+});
 </script>
 </body>
 </html>

@@ -14,7 +14,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
           <h2>Welcome, <%= typeof nurse !== 'undefined' ? nurse.name : 'Meera' %>!</h2>
-          <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today | <a href="/" style="color: white; text-decoration: none;">Home</a> | <a href="/logout" style="color: rgb(255, 0, 0); text-decoration: none;">Logout</a></p>
+          <p>You have <%= typeof appointmentCount !== 'undefined' ? appointmentCount : '3' %> appointments today | <a href="/logout" style="color: rgb(255, 0, 0); text-decoration: none;">Logout</a></p>
         </div>
         <a href="/nurse/edit-profile" style="background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; white-space: nowrap; margin-left: 20px;">Edit My Profile</a>
       </div>
@@ -87,32 +87,27 @@
 
       <div class="right-side">
         <div class="pending">
-          <h3>Pending Requests</h3>
+          <h3>Pending Booking Requests</h3>
           <% 
-          const pendingRequests = (nurse.history || [])
-            .filter(h => h.category === 'pending')
-            .slice(0, 2)
-            .map((req, idx) => ({
-              patient: req.notes || 'Patient ' + (idx + 1),
-              service: req.meta?.service || 'Care Service',
-              time: req.meta?.time || 'Tomorrow 10:00 AM'
-            }));
+          const pendingRequests = typeof pendingBookingRequests !== 'undefined' ? pendingBookingRequests : [];
           
           if (pendingRequests.length === 0) {
             pendingRequests.push(
-              { patient: 'No pending requests', service: 'All caught up!', time: '--' }
+              { _id: null, patient: { name: 'No pending requests' }, serviceType: 'All caught up!', appointmentDate: '--', appointmentTime: '--' }
             );
           }
           %>
           
           <% pendingRequests.forEach(request => { %>
-            <div class="pending-card">
-              <h4><%= request.patient %></h4>
-              <p><%= request.service %> – <%= request.time %></p>
-              <div class="actions">
-                <button class="accept">Accept</button>
-                <button class="decline">Decline</button>
-              </div>
+            <div class="pending-card" <% if (request._id) { %>data-appointment-id="<%= request._id %>"<% } %>>
+              <h4><%= typeof request.userId !== 'undefined' ? request.userId.name : request.patient?.name || 'Patient' %></h4>
+              <p><%= request.serviceType || 'Care Service' %> – <%= new Date(request.appointmentDate).toLocaleDateString() %> at <%= request.appointmentTime %></p>
+              <% if (request._id) { %>
+                <div class="actions">
+                  <button class="accept" onclick="acceptBooking('<%= request._id %>')">Accept</button>
+                  <button class="decline" onclick="declineBooking('<%= request._id %>')">Decline</button>
+                </div>
+              <% } %>
             </div>
           <% }); %>
         </div>
@@ -137,6 +132,51 @@
   </main>
 
   <%- include('partials/footer') %>
+
+  <script>
+    // Handle booking accept/decline
+    async function acceptBooking(appointmentId) {
+      if (!confirm('Do you want to accept this booking?')) return;
+
+      try {
+        const response = await fetch(`/nurse/accept-booking/${appointmentId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+          alert('✅ Booking accepted! Patient has been notified.');
+          location.reload();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Error accepting booking: ' + err.message);
+      }
+    }
+
+    async function declineBooking(appointmentId) {
+      if (!confirm('Are you sure you want to decline this booking?')) return;
+
+      try {
+        const response = await fetch(`/nurse/decline-booking/${appointmentId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+          alert('✅ Booking declined. Patient will be notified.');
+          location.reload();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Error declining booking: ' + err.message);
+      }
+    }
+  </script>
 
   <script src="/js/nurseportal.js"></script>
 </body>

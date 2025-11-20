@@ -281,6 +281,16 @@ app.get('/nurses', async (req, res) => {
   }
 });
 
+// News page
+app.get('/news', (req, res) => {
+  res.render('news', { page: 'news' });
+});
+
+// Services page
+app.get('/services', (req, res) => {
+  res.render('services', { page: 'services' });
+});
+
 // Booking page
 app.get('/booking', async (req, res) => {
   const nurseId = req.query.nurse;
@@ -339,7 +349,7 @@ app.post('/book-appointment', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Missing required fields' });
     }
 
-    // Create appointment
+    // Create appointment with PENDING status (nurse must accept)
     const appointment = await Appointment.create({
       userId: req.session.userId,
       nurseId: nurseId,
@@ -352,10 +362,10 @@ app.post('/book-appointment', async (req, res) => {
       appointmentTime: appointmentTime,
       paymentMethod: paymentMethod,
       insuranceCoverage: insuranceCoverage === 'true' || insuranceCoverage === true,
-      status: 'confirmed'
+      status: 'pending'  // Changed from 'confirmed' to 'pending'
     });
 
-    console.log(' Appointment created:', {
+    console.log('✅ Booking request created (pending nurse approval):', {
       id: appointment._id,
       patient: req.session.userId,
       nurse: nurseName,
@@ -364,7 +374,7 @@ app.post('/book-appointment', async (req, res) => {
       service: serviceType
     });
 
-    return res.json({ ok: true, appointment: appointment });
+    return res.json({ ok: true, appointment: appointment, message: 'Booking request sent to nurse. Waiting for approval.' });
   } catch (err) {
     console.error('❌ Error booking appointment:', err);
     return res.status(500).json({ ok: false, error: 'Failed to book appointment: ' + err.message });
@@ -394,7 +404,7 @@ app.get('/my-appointments', async (req, res) => {
   }
 });
 
-//  Get Appointments API (for AJAX)
+//  Get Appointments API 
 app.get('/api/appointments', async (req, res) => {
   try {
     if (!req.session || !req.session.userId) {
@@ -566,10 +576,32 @@ app.get('/nurseportal', async (req, res) => {
   // Fetch nurse-specific data from Nurse collection
   try {
     const nurseProfile = await Nurse.findOne({ userId: req.session.userId }).lean();
-    res.render('nurseportal', { nurse, nurseProfile });
+    
+    // Fetch pending booking requests for this nurse
+    let pendingBookingRequests = [];
+    if (nurseProfile) {
+      pendingBookingRequests = await Appointment.find({
+        nurseId: nurseProfile._id,
+        status: 'pending'
+      })
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
+    }
+
+    res.render('nurseportal', { 
+      nurse, 
+      nurseProfile,
+      pendingBookingRequests: pendingBookingRequests || []
+    });
   } catch (err) {
     console.error('Error fetching nurse profile:', err);
-    res.render('nurseportal', { nurse, nurseProfile: null });
+    res.render('nurseportal', { 
+      nurse, 
+      nurseProfile: null,
+      pendingBookingRequests: []
+    });
   }
 });
 
@@ -1056,6 +1088,213 @@ app.post('/patient/update-profile', upload.single('photo'), async (req, res) => 
     });
   } catch (err) {
     console.error('Error updating patient profile:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// ===== NURSE BOOKING REQUEST ROUTES =====
+
+// GET nurse's pending booking requests
+app.get('/nurse/booking-requests', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.redirect('/login');
+    }
+
+    const user = await User.findById(req.session.userId);
+    if (!user || user.role !== 'nurse') {
+      return res.status(403).send('Only nurses can access this');
+    }
+
+    // Get nurse document to get nurseId
+    const nurseProfile = await Nurse.findOne({ userId: req.session.userId });
+    if (!nurseProfile) {
+      return res.status(404).send('Nurse profile not found');
+    }
+
+    // Get pending booking requests for this nurse
+    const pendingRequests = await Appointment.find({ 
+      nurseId: nurseProfile._id,
+      status: 'pending' 
+    })
+      .populate('userId', 'name email profile')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({ 
+      ok: true, 
+      requests: pendingRequests,
+      count: pendingRequests.length 
+    });
+  } catch (err) {
+    console.error('Error fetching booking requests:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST accept booking request
+app.post('/nurse/accept-booking/:appointmentId', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ ok: false, error: 'Not logged in' });
+    }
+
+    const user = await User.findById(req.session.userId);
+    if (!user || user.role !== 'nurse') {
+      return res.status(403).json({ ok: false, error: 'Only nurses can accept bookings' });
+    }
+
+    const appointment = await Appointment.findById(req.params.appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ ok: false, error: 'Appointment not found' });
+    }
+
+    // Verify this appointment is for the nurse
+    const nurseProfile = await Nurse.findOne({ userId: req.session.userId });
+    if (!nurseProfile || appointment.nurseId.toString() !== nurseProfile._id.toString()) {
+      return res.status(403).json({ ok: false, error: 'This booking is not for you' });
+    }
+
+    // Update appointment status to confirmed
+    appointment.status = 'confirmed';
+    await appointment.save();
+
+    console.log('✅ Nurse accepted booking:', {
+      appointmentId: appointment._id,
+      nurse: user.name,
+      patient: appointment.userId,
+      date: appointment.appointmentDate
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Booking accepted!',
+      appointment: appointment 
+    });
+  } catch (err) {
+    console.error('Error accepting booking:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST decline booking request
+app.post('/nurse/decline-booking/:appointmentId', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ ok: false, error: 'Not logged in' });
+    }
+
+    const user = await User.findById(req.session.userId);
+    if (!user || user.role !== 'nurse') {
+      return res.status(403).json({ ok: false, error: 'Only nurses can decline bookings' });
+    }
+
+    const appointment = await Appointment.findById(req.params.appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ ok: false, error: 'Appointment not found' });
+    }
+
+    // Verify this appointment is for the nurse
+    const nurseProfile = await Nurse.findOne({ userId: req.session.userId });
+    if (!nurseProfile || appointment.nurseId.toString() !== nurseProfile._id.toString()) {
+      return res.status(403).json({ ok: false, error: 'This booking is not for you' });
+    }
+
+    // Update appointment status to cancelled
+    appointment.status = 'cancelled';
+    await appointment.save();
+
+    console.log('✅ Nurse declined booking:', {
+      appointmentId: appointment._id,
+      nurse: user.name,
+      patient: appointment.userId,
+      date: appointment.appointmentDate
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Booking declined',
+      appointment: appointment 
+    });
+  } catch (err) {
+    console.error('Error declining booking:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST - Patient rates nurse for completed appointment
+app.post('/patient/rate-nurse/:appointmentId', async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ ok: false, error: 'Not logged in' });
+    }
+
+    const { rating, feedback } = req.body;
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ ok: false, error: 'Rating must be between 1 and 5' });
+    }
+
+    const appointment = await Appointment.findById(req.params.appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ ok: false, error: 'Appointment not found' });
+    }
+
+    // Verify this appointment belongs to the patient
+    if (appointment.userId.toString() !== req.session.userId) {
+      return res.status(403).json({ ok: false, error: 'You can only rate your own appointments' });
+    }
+
+    // Check if appointment is completed
+    if (appointment.status !== 'completed') {
+      return res.status(400).json({ ok: false, error: 'You can only rate completed appointments' });
+    }
+
+    // Update appointment with rating and feedback
+    appointment.rating = parseInt(rating);
+    appointment.feedback = feedback || '';
+    appointment.ratedAt = new Date();
+    await appointment.save();
+
+    // Update nurse's average rating
+    const nurseProfile = await Nurse.findById(appointment.nurseId);
+    if (nurseProfile) {
+      // Get all ratings for this nurse
+      const allAppointments = await Appointment.find({ nurseId: appointment.nurseId, rating: { $ne: null } });
+      const totalRating = allAppointments.reduce((sum, apt) => sum + apt.rating, 0);
+      const averageRating = totalRating / allAppointments.length;
+      
+      nurseProfile.rating = parseFloat(averageRating.toFixed(1));
+      
+      // Store review in reviews array
+      if (!nurseProfile.reviews) nurseProfile.reviews = [];
+      nurseProfile.reviews.push({
+        patientId: req.session.userId,
+        patientName: (await User.findById(req.session.userId))?.name || 'Anonymous',
+        rating: parseInt(rating),
+        feedback: feedback || '',
+        date: new Date()
+      });
+      
+      await nurseProfile.save();
+    }
+
+    console.log('✅ Patient rated nurse:', {
+      appointmentId: appointment._id,
+      patient: req.session.userId,
+      nurse: appointment.nurseId,
+      rating: rating,
+      feedback: feedback || 'No feedback'
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Thank you for rating this nurse!',
+      appointment: appointment 
+    });
+  } catch (err) {
+    console.error('Error rating nurse:', err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });

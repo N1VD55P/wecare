@@ -19,6 +19,10 @@ const AppointmentSchema = new mongoose.Schema({
     default: 'confirmed'
   },
   notes: { type: String },
+  // Rating and Feedback fields
+  rating: { type: Number, min: 1, max: 5, default: null },
+  feedback: { type: String, default: '' },
+  ratedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
