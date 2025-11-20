@@ -355,7 +355,7 @@ app.post('/book-appointment', async (req, res) => {
       status: 'confirmed'
     });
 
-    console.log('✅ Appointment created:', {
+    console.log(' Appointment created:', {
       id: appointment._id,
       patient: req.session.userId,
       nurse: nurseName,
@@ -371,7 +371,7 @@ app.post('/book-appointment', async (req, res) => {
   }
 });
 
-// ✅ Get User Appointments
+//  Get User Appointments
 app.get('/my-appointments', async (req, res) => {
   try {
     if (!req.session || !req.session.userId) {
@@ -394,7 +394,7 @@ app.get('/my-appointments', async (req, res) => {
   }
 });
 
-// ✅ Get Appointments API (for AJAX)
+//  Get Appointments API (for AJAX)
 app.get('/api/appointments', async (req, res) => {
   try {
     if (!req.session || !req.session.userId) {
@@ -803,14 +803,35 @@ app.get('/nurse/edit-profile', async (req, res) => {
       return res.status(403).send('Only nurses can access this page');
     }
 
-    // Get nurse profile
-    const nurseProfile = await Nurse.findOne({ userId: req.session.userId }).lean();
+    // Get nurse profile, or create if doesn't exist
+    let nurseProfile = await Nurse.findOne({ userId: req.session.userId }).lean();
+    
     if (!nurseProfile) {
-      return res.status(404).send('Nurse profile not found');
+      // Create nurse profile if it doesn't exist
+      try {
+        nurseProfile = await Nurse.create({
+          userId: req.session.userId,
+          name: user.name,
+          specialization: 'General Nursing',
+          rating: 4.5,
+          reviews: 0,
+          distance: '0 km away',
+          profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg',
+          hourlyRate: '500',
+          experience: '0 years',
+          licenseNumber: 'PENDING',
+          isActive: true,
+          certifications: ''
+        });
+        console.log('✅ Nurse profile created for existing user:', nurseProfile._id);
+      } catch (createErr) {
+        console.error('Error creating nurse profile:', createErr);
+        return res.status(500).send('Error initializing nurse profile');
+      }
     }
 
     // Render edit profile page
-    res.render('nurse-edit-profile', { 
+    res.render('edit-nurse-profile', { 
       user,
       nurse: nurseProfile,
       message: req.query.message || null
@@ -837,8 +858,29 @@ app.post('/nurse/update-profile', upload.single('profileImage'), async (req, res
 
     // Get nurse profile
     let nurseProfile = await Nurse.findOne({ userId: req.session.userId });
+    
+    // Create nurse profile if it doesn't exist
     if (!nurseProfile) {
-      return res.status(404).json({ ok: false, error: 'Nurse profile not found' });
+      try {
+        nurseProfile = await Nurse.create({
+          userId: req.session.userId,
+          name: user.name,
+          specialization: 'General Nursing',
+          rating: 4.5,
+          reviews: 0,
+          distance: '0 km away',
+          profileImage: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg',
+          hourlyRate: '500',
+          experience: '0 years',
+          licenseNumber: 'PENDING',
+          isActive: true,
+          certifications: ''
+        });
+        console.log('✅ Nurse profile created for existing user:', nurseProfile._id);
+      } catch (createErr) {
+        console.error('Error creating nurse profile:', createErr);
+        return res.status(500).json({ ok: false, error: 'Error initializing nurse profile' });
+      }
     }
 
     // Extract form data
@@ -913,6 +955,107 @@ app.get('/api/nurse/profile', async (req, res) => {
     res.json({ ok: true, nurse: nurseProfile });
   } catch (err) {
     console.error('Error fetching nurse profile:', err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// ===== PATIENT EDIT PROFILE ROUTES =====
+
+// GET edit patient profile
+app.get('/patient/edit-profile', async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.userId) {
+      return res.redirect('/login');
+    }
+
+    // Get current user
+    const user = await User.findById(req.session.userId).lean();
+    if (!user || user.role !== 'patient') {
+      return res.status(403).send('Only patients can access this page');
+    }
+
+    // Render edit profile page
+    res.render('edit-patient-profile', { 
+      patient: user,
+      message: req.query.message || null
+    });
+  } catch (err) {
+    console.error('Error loading patient edit profile:', err);
+    res.status(500).send('Error loading profile');
+  }
+});
+
+// POST update patient profile
+app.post('/patient/update-profile', upload.single('photo'), async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ ok: false, error: 'Not logged in' });
+    }
+
+    // Get current user
+    const user = await User.findById(req.session.userId);
+    if (!user || user.role !== 'patient') {
+      return res.status(403).json({ ok: false, error: 'Only patients can update profiles' });
+    }
+
+    // Extract form data
+    const {
+      name,
+      phone,
+      dob,
+      gender,
+      bloodGroup,
+      address,
+      city,
+      state,
+      zip,
+      emergencyContact,
+      notes
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !name.trim()) {
+      return res.status(400).json({ ok: false, error: 'Name is required' });
+    }
+
+    // Update user
+    user.name = name.trim();
+
+    // Update profile fields
+    if (!user.profile) {
+      user.profile = {};
+    }
+
+    user.profile.phone = phone ? phone.trim() : '';
+    user.profile.dob = dob ? new Date(dob) : null;
+    user.profile.gender = gender || '';
+    user.profile.bloodGroup = bloodGroup || '';
+    user.profile.address = address ? address.trim() : '';
+    user.profile.city = city ? city.trim() : '';
+    user.profile.state = state ? state.trim() : '';
+    user.profile.zip = zip ? zip.trim() : '';
+    user.profile.emergencyContact = emergencyContact ? emergencyContact.trim() : '';
+    user.profile.notes = notes ? notes.trim() : '';
+
+    // Handle profile photo if uploaded
+    if (req.file) {
+      // Multer already saved the file with diskStorage
+      // req.file.filename is the saved filename
+      user.profile.photo = `/uploads/${req.file.filename}`;
+    }
+
+    // Save user
+    await user.save();
+
+    res.json({ 
+      ok: true, 
+      message: 'Profile updated successfully',
+      patient: user
+    });
+  } catch (err) {
+    console.error('Error updating patient profile:', err);
     res.status(500).json({ ok: false, error: err.message });
   }
 });

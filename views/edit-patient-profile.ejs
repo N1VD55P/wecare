@@ -1,0 +1,574 @@
+<!-- views/edit-patient-profile.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Patient Profile</title>
+  <link rel="stylesheet" href="/css/patient.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Edit Profile Specific Styles */
+    .edit-profile-container {
+      background: #f8fafc;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    .edit-profile-header {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-profile-header h1 {
+      font-size: 32px;
+      color: #011941;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .edit-profile-header p {
+      color: #64748b;
+      font-size: 16px;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section {
+      margin-bottom: 40px;
+    }
+
+    .form-section h2 {
+      font-size: 20px;
+      color: #011941;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eaf3ff;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #011941;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group.required label::after {
+      content: " *";
+      color: #dc2626;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .photo-section {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .photo-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .photo-display {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 4px solid #4a90e2;
+      object-fit: cover;
+      background: #eaf3ff;
+    }
+
+    .photo-upload {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #4a90e2;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+      text-align: center;
+    }
+
+    .file-input-label:hover {
+      background: #1a3d7c;
+    }
+
+    .file-name {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-save {
+      background: #4a90e2;
+      color: white;
+      box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+    }
+
+    .btn-save:hover {
+      background: #1a3d7c;
+      box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #011941;
+    }
+
+    .btn-cancel:hover {
+      background: #cbd5e1;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #22c55e;
+    }
+
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #dc2626;
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-right: 10px;
+    }
+
+    .loading-spinner.show {
+      display: inline-block;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #4a90e2;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .edit-profile-container {
+        padding: 20px;
+      }
+
+      .form-container {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-section {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="main-content">
+    <div class="edit-profile-container">
+      <div class="edit-profile-header">
+        <h1>Edit Your Profile</h1>
+        <p>Update your personal and health information</p>
+      </div>
+
+      <div class="form-container">
+        <div id="message" class="message"></div>
+
+        <form id="editProfileForm" enctype="multipart/form-data">
+          <!-- Photo Section -->
+          <div class="form-section">
+            <h2>Profile Photo</h2>
+            <div class="photo-section">
+              <div class="photo-preview">
+                <img 
+                  id="photoPreview" 
+                  class="photo-display" 
+                  src="<%= patient.profile && patient.profile.photo ? patient.profile.photo : 'https://via.placeholder.com/180?text=No+Photo' %>" 
+                  alt="Profile Photo"
+                />
+              </div>
+              <div class="photo-upload">
+                <p style="color: #011941; font-weight: 500;">Update Profile Photo</p>
+                <div class="file-input-wrapper">
+                  <input type="file" id="photoInput" name="photo" accept="image/png,image/jpeg,image/jpg" />
+                  <label for="photoInput" class="file-input-label">
+                    <i class="fas fa-camera"></i> Choose Photo
+                  </label>
+                </div>
+                <span class="file-name" id="fileName">PNG or JPG, max 5 MB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Information -->
+          <div class="form-section">
+            <h2>Personal Information</h2>
+            <div class="form-grid">
+              <div class="form-group required">
+                <label for="name">Full Name</label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  value="<%= patient.name || '' %>" 
+                  required
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  name="phone" 
+                  value="<%= patient.profile && patient.profile.phone ? patient.profile.phone : '' %>"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input 
+                  type="date" 
+                  id="dob" 
+                  name="dob" 
+                  value="<%= patient.profile && patient.profile.dob ? patient.profile.dob.toISOString().split('T')[0] : '' %>"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                  <option value="">Select Gender</option>
+                  <option value="male" <%= patient.profile && patient.profile.gender === 'male' ? 'selected' : '' %>>Male</option>
+                  <option value="female" <%= patient.profile && patient.profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+                  <option value="other" <%= patient.profile && patient.profile.gender === 'other' ? 'selected' : '' %>>Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="bloodGroup">Blood Group</label>
+                <select id="bloodGroup" name="bloodGroup">
+                  <option value="">Select Blood Group</option>
+                  <option value="A+" <%= patient.profile && patient.profile.bloodGroup === 'A+' ? 'selected' : '' %>>A+</option>
+                  <option value="A-" <%= patient.profile && patient.profile.bloodGroup === 'A-' ? 'selected' : '' %>>A-</option>
+                  <option value="B+" <%= patient.profile && patient.profile.bloodGroup === 'B+' ? 'selected' : '' %>>B+</option>
+                  <option value="B-" <%= patient.profile && patient.profile.bloodGroup === 'B-' ? 'selected' : '' %>>B-</option>
+                  <option value="O+" <%= patient.profile && patient.profile.bloodGroup === 'O+' ? 'selected' : '' %>>O+</option>
+                  <option value="O-" <%= patient.profile && patient.profile.bloodGroup === 'O-' ? 'selected' : '' %>>O-</option>
+                  <option value="AB+" <%= patient.profile && patient.profile.bloodGroup === 'AB+' ? 'selected' : '' %>>AB+</option>
+                  <option value="AB-" <%= patient.profile && patient.profile.bloodGroup === 'AB-' ? 'selected' : '' %>>AB-</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Address Information -->
+          <div class="form-section">
+            <h2>Address Information</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="address">Street Address</label>
+                <input 
+                  type="text" 
+                  id="address" 
+                  name="address" 
+                  value="<%= patient.profile && patient.profile.address ? patient.profile.address : '' %>"
+                  placeholder="Enter street address"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="city">City</label>
+                <input 
+                  type="text" 
+                  id="city" 
+                  name="city" 
+                  value="<%= patient.profile && patient.profile.city ? patient.profile.city : '' %>"
+                  placeholder="Enter city"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="state">State/Province</label>
+                <input 
+                  type="text" 
+                  id="state" 
+                  name="state" 
+                  value="<%= patient.profile && patient.profile.state ? patient.profile.state : '' %>"
+                  placeholder="Enter state/province"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="zip">Postal Code</label>
+                <input 
+                  type="text" 
+                  id="zip" 
+                  name="zip" 
+                  value="<%= patient.profile && patient.profile.zip ? patient.profile.zip : '' %>"
+                  placeholder="Enter postal code"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency Contact -->
+          <div class="form-section">
+            <h2>Emergency Contact</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="emergencyContact">Emergency Contact Name & Number</label>
+                <input 
+                  type="text" 
+                  id="emergencyContact" 
+                  name="emergencyContact" 
+                  value="<%= patient.profile && patient.profile.emergencyContact ? patient.profile.emergencyContact : '' %>"
+                  placeholder="e.g., John Doe - 9876543210"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Notes -->
+          <div class="form-section">
+            <h2>Additional Information</h2>
+            <div class="form-group">
+              <label for="notes">Medical Notes (Allergies, Conditions, etc.)</label>
+              <textarea 
+                id="notes" 
+                name="notes" 
+                placeholder="Add any important medical information"
+              ><%= patient.profile && patient.profile.notes ? patient.profile.notes : '' %></textarea>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn btn-save" id="submitBtn">
+              <span class="loading-spinner" id="spinner"></span>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('editProfileForm');
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const fileName = document.getElementById('fileName');
+    const messageDiv = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+
+    // Photo preview handler
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file type
+        if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+          showMessage('❌ Please select a PNG or JPG image', 'error');
+          photoInput.value = '';
+          fileName.textContent = 'PNG or JPG, max 5 MB';
+          return;
+        }
+
+        // Validate file size
+        if (file.size > 5 * 1024 * 1024) {
+          showMessage('❌ File size must be less than 5 MB', 'error');
+          photoInput.value = '';
+          fileName.textContent = 'PNG or JPG, max 5 MB';
+          return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photoPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        fileName.textContent = `✓ ${file.name}`;
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Validate required fields
+      if (!form.checkValidity()) {
+        showMessage('❌ Please fill in all required fields', 'error');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      spinner.classList.add('show');
+
+      try {
+        const formData = new FormData(form);
+
+        const response = await fetch('/patient/update-profile', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          showMessage('✅ Profile updated successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = '/patientportal';
+          }, 1500);
+        } else {
+          showMessage('❌ Error: ' + (data.error || 'Failed to update profile'), 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('❌ An error occurred. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        spinner.classList.remove('show');
+      }
+    });
+
+    // Show message function
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message show ${type}`;
+      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      if (type === 'success') {
+        setTimeout(() => {
+          messageDiv.classList.remove('show');
+        }, 4000);
+      }
+    }
+  </script>
+</body>
+</html>

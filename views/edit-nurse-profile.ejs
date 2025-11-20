@@ -1,0 +1,546 @@
+<!-- views/edit-nurse-profile.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Nurse Profile - WeCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Playwrite+AU+VIC+Guides&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #eaf3ff;
+      min-height: 100vh;
+      padding: 20px 30px;
+    }
+
+    .main-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .edit-header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-header h1 {
+      font-size: 28px;
+      color: #011941;
+      font-family: "Playfair Display", serif;
+      margin-bottom: 5px;
+    }
+
+    .edit-header p {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #4a90e2;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #1a3d7c;
+    }
+
+    .form-container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-section {
+      margin-bottom: 40px;
+    }
+
+    .form-section:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .form-section h2 {
+      font-size: 18px;
+      color: #011941;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eaf3ff;
+      font-weight: 600;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #011941;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group.required label::after {
+      content: " *";
+      color: #dc2626;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Segoe UI', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .photo-section {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8fbff;
+      border-radius: 8px;
+    }
+
+    .photo-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .photo-display {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px solid #4a90e2;
+      object-fit: cover;
+      background: #eaf3ff;
+    }
+
+    .photo-upload {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #4a90e2;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+      text-align: center;
+      width: fit-content;
+    }
+
+    .file-input-label:hover {
+      background: #1a3d7c;
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid #eaf3ff;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-save {
+      background: #4CAF50;
+      color: white;
+      box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+    }
+
+    .btn-save:hover {
+      background: #45a049;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-cancel {
+      background: #ddd;
+      color: #011941;
+    }
+
+    .btn-cancel:hover {
+      background: #ccc;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      border-left: 4px solid;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border-color: #28a745;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-right: 8px;
+    }
+
+    .loading-spinner.show {
+      display: inline-block;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #4a90e2;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-section {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .edit-header h1 {
+        font-size: 24px;
+      }
+
+      body {
+        padding: 15px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <a href="/nurseportal" class="back-link">← Back to Dashboard</a>
+
+    <div class="edit-header">
+      <h1>Edit Your Profile</h1>
+      <p>Update your professional details and information</p>
+    </div>
+
+    <div class="form-container">
+      <div id="message" class="message"></div>
+
+      <form id="editProfileForm" enctype="multipart/form-data">
+        <!-- Photo Section -->
+        <div class="form-section">
+          <h2>Profile Photo</h2>
+          <div class="photo-section">
+            <div class="photo-preview">
+              <img 
+                id="photoPreview" 
+                class="photo-display" 
+                src="<%= nurse && nurse.profileImage ? nurse.profileImage : 'https://via.placeholder.com/200?text=No+Photo' %>" 
+                alt="Profile Photo"
+              />
+            </div>
+            <div class="photo-upload">
+              <p style="color: #011941; font-weight: 500;">Update Profile Photo</p>
+              <div class="file-input-wrapper">
+                <input type="file" id="photoInput" name="profileImage" accept="image/png,image/jpeg,image/jpg" />
+                <label for="photoInput" class="file-input-label">
+                  Choose Photo
+                </label>
+              </div>
+              <span class="file-name" id="fileName">PNG or JPG, max 5 MB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="form-section">
+          <h2>Personal Information</h2>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="name">Full Name</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value="<%= nurse && nurse.name ? nurse.name : '' %>" 
+                required
+                placeholder="Enter your full name"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Professional Details -->
+        <div class="form-section">
+          <h2>Professional Details</h2>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="specialization">Specialization</label>
+              <select id="specialization" name="specialization" required>
+                <option value="">Select Specialization</option>
+                <option value="General Nursing" <%= nurse && nurse.specialization === 'General Nursing' ? 'selected' : '' %>>General Nursing</option>
+                <option value="Pediatric Nursing" <%= nurse && nurse.specialization === 'Pediatric Nursing' ? 'selected' : '' %>>Pediatric Nursing</option>
+                <option value="Critical Care" <%= nurse && nurse.specialization === 'Critical Care' ? 'selected' : '' %>>Critical Care</option>
+                <option value="Geriatric Nursing" <%= nurse && nurse.specialization === 'Geriatric Nursing' ? 'selected' : '' %>>Geriatric Nursing</option>
+                <option value="Psychiatric Nursing" <%= nurse && nurse.specialization === 'Psychiatric Nursing' ? 'selected' : '' %>>Psychiatric Nursing</option>
+                <option value="Oncology Nursing" <%= nurse && nurse.specialization === 'Oncology Nursing' ? 'selected' : '' %>>Oncology Nursing</option>
+                <option value="Emergency Nursing" <%= nurse && nurse.specialization === 'Emergency Nursing' ? 'selected' : '' %>>Emergency Nursing</option>
+                <option value="Home Health Nursing" <%= nurse && nurse.specialization === 'Home Health Nursing' ? 'selected' : '' %>>Home Health Nursing</option>
+                <option value="Community Health Nursing" <%= nurse && nurse.specialization === 'Community Health Nursing' ? 'selected' : '' %>>Community Health Nursing</option>
+              </select>
+            </div>
+
+            <div class="form-group required">
+              <label for="hourlyRate">Hourly Rate (₹)</label>
+              <input 
+                type="number" 
+                id="hourlyRate" 
+                name="hourlyRate" 
+                value="<%= nurse && nurse.hourlyRate ? nurse.hourlyRate : '' %>" 
+                required
+                placeholder="e.g., 500"
+                min="0"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="experience">Years of Experience</label>
+              <input 
+                type="text" 
+                id="experience" 
+                name="experience" 
+                value="<%= nurse && nurse.experience ? nurse.experience : '' %>"
+                placeholder="e.g., 5 years"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="licenseNumber">License Number</label>
+              <input 
+                type="text" 
+                id="licenseNumber" 
+                name="licenseNumber" 
+                value="<%= nurse && nurse.licenseNumber ? nurse.licenseNumber : '' %>"
+                placeholder="e.g., ABC123456"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="certifications">Certifications</label>
+              <textarea 
+                id="certifications" 
+                name="certifications" 
+                placeholder="List your certifications (e.g., BSc Nursing, AIIMS Certified)"
+              ><%= nurse && nurse.certifications ? nurse.certifications : '' %></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+          <button type="submit" class="btn btn-save" id="submitBtn">
+            <span class="loading-spinner" id="spinner"></span>
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('editProfileForm');
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const fileName = document.getElementById('fileName');
+    const messageDiv = document.getElementById('message');
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+
+    // Photo preview handler
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file type
+        if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+          showMessage('❌ Please select a PNG or JPG image', 'error');
+          photoInput.value = '';
+          fileName.textContent = 'PNG or JPG, max 5 MB';
+          return;
+        }
+
+        // Validate file size
+        if (file.size > 5 * 1024 * 1024) {
+          showMessage('❌ File size must be less than 5 MB', 'error');
+          photoInput.value = '';
+          fileName.textContent = 'PNG or JPG, max 5 MB';
+          return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photoPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        fileName.textContent = `✓ ${file.name}`;
+      }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Validate required fields
+      if (!form.checkValidity()) {
+        showMessage('❌ Please fill in all required fields', 'error');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      spinner.classList.add('show');
+
+      try {
+        const formData = new FormData(form);
+
+        const response = await fetch('/nurse/update-profile', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          showMessage('✅ Profile updated successfully!', 'success');
+          setTimeout(() => {
+            window.location.href = '/nurseportal';
+          }, 1500);
+        } else {
+          showMessage('❌ Error: ' + (data.error || 'Failed to update profile'), 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('❌ An error occurred. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        spinner.classList.remove('show');
+      }
+    });
+
+    // Show message function
+    function showMessage(text, type) {
+      messageDiv.textContent = text;
+      messageDiv.className = `message show ${type}`;
+      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      if (type === 'success') {
+        setTimeout(() => {
+          messageDiv.classList.remove('show');
+        }, 4000);
+      }
+    }
+  </script>
+</body>
+</html>
