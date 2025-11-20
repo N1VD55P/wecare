@@ -556,14 +556,33 @@ app.get('/patientportal', async (req, res) => {
   
   const user = res.locals.currentUser || {};
   
-  // Fetch any 2 nurses from database
+  // Fetch saved nurses from database
+  let savedNurses = [];
+  let upcomingAppointments = [];
+  
   try {
-    const savedNurses = await Nurse.find({ isActive: true }).limit(2).lean();
-    res.render('patientportal', { patient: user, savedNurses });
+    savedNurses = await Nurse.find({ isActive: true }).limit(2).lean();
   } catch (err) {
     console.error('Error fetching saved nurses:', err);
-    res.render('patientportal', { patient: user, savedNurses: [] });
+    savedNurses = [];
   }
+  
+  // Fetch upcoming appointments (pending or confirmed status)
+  try {
+    upcomingAppointments = await Appointment.find({
+      userId: req.session.userId,
+      status: { $in: ['pending', 'confirmed'] }
+    }).lean();
+  } catch (err) {
+    console.error('Error fetching upcoming appointments:', err);
+    upcomingAppointments = [];
+  }
+  
+  res.render('patientportal', { 
+    patient: user, 
+    savedNurses: savedNurses,
+    appointments: upcomingAppointments
+  });
 });
 
 // Nurse portal

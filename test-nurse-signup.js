@@ -12,14 +12,14 @@ async function testNurseSignup() {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    console.log('✅ Connected to MongoDB');
+    console.log(' Connected to MongoDB');
 
     // Create a test nurse
     const testEmail = `nurse-${Date.now()}@test.com`;
     const testName = 'Dr. Sarah Johnson';
     const testPassword = 'Test@123456';
 
-    console.log(`\n📝 Creating new nurse...`);
+    console.log(`\n Creating new nurse...`);
     console.log(`   Name: ${testName}`);
     console.log(`   Email: ${testEmail}`);
     console.log(`   Role: nurse`);
@@ -34,7 +34,7 @@ async function testNurseSignup() {
       password: hashedPassword,
       role: 'nurse'
     });
-    console.log(`✅ User created: ${newUser._id}`);
+    console.log(` User created: ${newUser._id}`);
 
     // Create nurse profile
     const nurseRecord = await Nurse.create({
@@ -50,28 +50,28 @@ async function testNurseSignup() {
       licenseNumber: 'PENDING',
       isActive: true
     });
-    console.log(`✅ Nurse profile created: ${nurseRecord._id}`);
+    console.log(` Nurse profile created: ${nurseRecord._id}`);
 
     // Verify nurse count
     const totalNurses = await Nurse.countDocuments();
     const activeNurses = await Nurse.countDocuments({ isActive: true });
     
-    console.log(`\n📊 Database Status:`);
+    console.log(`\n Database Status:`);
     console.log(`   Total Nurses: ${totalNurses}`);
     console.log(`   Active Nurses: ${activeNurses}`);
 
     // Get all nurses
     const allNurses = await Nurse.find({ isActive: true }).lean();
-    console.log(`\n📋 Active Nurses List:`);
+    console.log(`\n Active Nurses List:`);
     allNurses.forEach((nurse, idx) => {
       console.log(`${idx + 1}. ${nurse.name} (${nurse.specialization}) - ${nurse.rating}⭐`);
     });
 
-    console.log(`\n✅ Test Complete! Visit http://localhost:3000/nurses to see the new nurse`);
+    console.log(`\n Test Complete! Visit http://localhost:3000/nurses to see the new nurse`);
     await mongoose.connection.close();
     process.exit(0);
   } catch (err) {
-    console.error('❌ Error:', err.message);
+    console.error(' Error:', err.message);
     process.exit(1);
   }
 }
