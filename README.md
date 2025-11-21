@@ -63,6 +63,11 @@ http://localhost:3000
 
 - `@vercel/speed-insights` may be optionally required; server will try to inject it if installed but will not fail if it's not available.
 
+## Deployment
+
+- Live demo: https://wecare-sandy.vercel.app/ (published on Vercel)
+
+
 ## Security & Git
 
 - `.env` is included in `.gitignore`.
