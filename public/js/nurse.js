@@ -4,9 +4,14 @@ let filteredNurses = [];
 
 async function loadNurses() {
   try {
-    const response = await fetch('data/cards.json');
-    const data = await response.json();
-    nursesData = data.nurses;
+    // Prefer server-provided data (injected into window.__NURSES__), otherwise fall back to local JSON
+    if (window && Array.isArray(window.__NURSES__) && window.__NURSES__.length > 0) {
+      nursesData = window.__NURSES__;
+    } else {
+      const response = await fetch('data/cards.json');
+      const data = await response.json();
+      nursesData = data.nurses;
+    }
     filteredNurses = [...nursesData];
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -61,8 +66,8 @@ function displayNurses(nurses) {
         <img src="${nurse.image}" alt="${nurse.name}">
       </div>
       <div class="nurse-details">
-        <h3 class="nurse-name">${nurse.name}</h3>
-        <p class="nurse-role">${nurse.role}</p>
+  <h3 class="nurse-name">${nurse.name}</h3>
+  <p class="nurse-role">${nurse.specialization || nurse.role || ''}</p>
         <div class="nurse-info">
           <span class="nurse-rating">⭐ ${nurse.rating}</span>
           <span class="nurse-distance">📍 ${nurse.distance}</span>
@@ -77,8 +82,9 @@ function displayNurses(nurses) {
 
 function bookNurse(nurse) {
   sessionStorage.setItem('selectedNurse', JSON.stringify(nurse));
-  
-  window.location.href = `booking.html?nurse=${encodeURIComponent(nurse.name)}`;
+  // Redirect to server booking route with nurse id when available
+  const nurseId = nurse.id || nurse._id || nurse._id_str || nurse.name;
+  window.location.href = `/booking?nurse=${encodeURIComponent(nurseId)}`;
 }
 
 function filterNurses() {
@@ -93,9 +99,10 @@ function filterNurses() {
   const ratingFilter = filterRating ? parseFloat(filterRating.value) : 0;
   
   filteredNurses = nursesData.filter(nurse => {
-    const matchesSearch = nurse.name.toLowerCase().includes(searchTerm) || 
-                         nurse.role.toLowerCase().includes(searchTerm);
-    const matchesRole = roleFilter === 'all' || nurse.role === roleFilter;
+    const specialization = (nurse.specialization || nurse.role || '').toString().toLowerCase();
+    const matchesSearch = (nurse.name && nurse.name.toLowerCase().includes(searchTerm)) || 
+                         specialization.includes(searchTerm);
+    const matchesRole = roleFilter === 'all' || specialization === roleFilter;
     const matchesRating = nurse.rating >= ratingFilter;
     
     return matchesSearch && matchesRole && matchesRating;

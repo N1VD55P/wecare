@@ -94,6 +94,10 @@
 
   <%- include('partials/footer') %>
 
+  <script>
+  // Pass server-side nurses data to client JS for filtering (escape '<' to avoid ending script tag)
+  window.__NURSES__ = <%- JSON.stringify(typeof nurses !== 'undefined' ? nurses : []).replace(/</g, '\\u003c') %>;
+  </script>
   <script src="/js/nurse.js"></script>
 </body>
 </html>
