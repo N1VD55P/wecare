@@ -67,12 +67,6 @@ http://localhost:3000
 
 - Live demo: https://wecare-sandy.vercel.app/ (published on Vercel)
 
-
-## Security & Git
-
-- `.env` is included in `.gitignore`.
-- If you previously committed sensitive secrets into git history, removing `.env` from the index (done via `git rm --cached .env`) only prevents future commits from including it. To fully remove it from git history you must rewrite history using tools such as `git filter-repo` or BFG. I can help with that if needed.
-
 ## Developer notes
 
 - Views live in `views/` and are EJS templates.
