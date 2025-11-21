@@ -4,6 +4,18 @@ const path = require('path');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// Optionally inject Vercel Speed Insights (safe require so app won't crash when not present)
+try {
+  const si = require('@vercel/speed-insights');
+  if (si && typeof si.injectSpeedInsights === 'function') {
+    si.injectSpeedInsights();
+    console.log('Vercel Speed Insights injected');
+  }
+} catch (err) {
+  // Not fatal; the package may not be installed in all environments
+  console.warn('Vercel Speed Insights not injected:', err.message);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -238,8 +250,8 @@ app.get('/nurses', async (req, res) => {
         id: 1,
         name: 'Priya Sharma',
         specialization: 'General Home Care Nurse',
-        rating: 4.8,
-        reviews: 145,
+          rating: 4.8,
+          reviews: 145,
         distance: '2.5 km away',
         image: 'https://i.pinimg.com/736x/42/96/46/429646366c50688783ed4239528f7e95.jpg'
       },
